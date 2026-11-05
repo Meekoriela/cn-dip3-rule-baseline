@@ -5,7 +5,8 @@
 - 页面不依赖任何后端，所有计算在构建时完成
 - 断言结果由 validate.collect_checks() 真实运行生成，不手写常量
 - 处理官方表的两个编码难点：`|` 多编码拆开、`-` 区间码单独建索引
-- 编码索引只存 [表, 行下标, 字段类型]，前端按需加载对应表分片
+- 编码索引按首字符分片；每个分片自带命中行的内容，查询时零二次请求
+- `sheets/*.json` 仅保留给「数据字典」展开前 20 行使用
 
 用法：
     python pipeline/export_web.py \
@@ -36,6 +37,17 @@ def write_json(path: Path, payload) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, separators=(",", ":")),
                     encoding="utf-8")
+
+
+def shard_key(code: str) -> str:
+    """按编码首字符分片；非字母数字归入下划线。"""
+    c = code[0].upper() if code else "_"
+    return c if c.isalnum() and c.isascii() else "_"
+
+
+def pack_row(row: dict) -> list:
+    """把行压成 [Excel 源行号, [[列下标, 非空值], ...]]，跳过空字段。"""
+    return [row["src"], [[j, v] for j, v in enumerate(row["v"]) if str(v).strip()]]
 
 
 def field_kind(column_name: str, sheet_name: str) -> str:
@@ -100,14 +112,18 @@ def main() -> int:
         })
     write_json(args.out / "dictionary.json", dictionary)
 
-    # 3) 表分片 + 编码索引
+    # 3) 表分片（数据字典用）+ 按首字符分片的编码索引（查询用，自带行内容）
     exact: dict[str, list] = {}
     ranges: list[dict] = []
     sheet_dir = args.out / "sheets"
+    shard_dir = args.out / "shards"
+    all_rows: dict[str, list] = {}
+    all_columns: dict[str, list] = {}
     total_rows = 0
 
     for table, _idx, sheet_name, _header_row, col_count, _row_count in sheets:
         col_names = [c["name"] for c in columns.get(table, [])]
+        all_columns[table] = col_names
         code_cols = [(i, n) for i, n in enumerate(col_names) if "编码" in n]
         select_cols = ", ".join(f'"c{i + 1}"' for i in range(col_count))
         raw = conn.execute(
@@ -151,10 +167,46 @@ def main() -> int:
             "columns": col_names,
             "rows": rows,
         })
+        all_rows[table] = rows
         total_rows += len(rows)
 
+    # 3a) 索引按编码首字符分片；每个分片内联自身命中的全部行，查询零二次请求
+    shard_exact: dict[str, dict] = {}
+    shard_rows: dict[str, set] = {}
+    for code, refs in exact.items():
+        key = shard_key(code)
+        shard_exact.setdefault(key, {})[code] = refs
+        target = shard_rows.setdefault(key, set())
+        for ref in refs:
+            target.add((ref[0], ref[1]))
+    # 区间码按其起始编码的首字符归入对应分片，命中时取同一分片的行
+    for rg in ranges:
+        key = shard_key(rg["start"])
+        shard_rows.setdefault(key, set()).add((rg["ref"][0], rg["ref"][1]))
+
+    shards = sorted(shard_exact.keys() | shard_rows.keys())
+    shard_stats = {}
+    for key in shards:
+        packed = {
+            f"{table}:{row_i}": pack_row(all_rows[table][row_i])
+            for table, row_i in sorted(shard_rows.get(key, set()))
+        }
+        write_json(shard_dir / f"{key}.json", {
+            "exact": shard_exact.get(key, {}),
+            "rows": packed,
+        })
+        shard_stats[key] = {
+            "codes": len(shard_exact.get(key, {})),
+            "rows": len(packed),
+        }
+
     write_json(args.out / "code_index.json", {
-        "exact": exact,
+        "mode": "sharded",
+        "shard_key": "编码首字符（0-9 / A-Z / _）",
+        "shards": shards,
+        "shard_stats": shard_stats,
+        "columns": all_columns,
+        "sheet_names": {table: name for table, _i, name, _h, _c, _r in sheets},
         "ranges": ranges,
         "stats": {
             "exact_keys": len(exact),
@@ -165,9 +217,12 @@ def main() -> int:
     })
     conn.close()
 
+    manifest_b = (args.out / "code_index.json").stat().st_size
+    shard_b = sum(p.stat().st_size for p in shard_dir.glob("*.json"))
     for p in sorted(args.out.rglob("*.json")):
         print(f"  {p.relative_to(args.out)}  {p.stat().st_size:>9,} B")
-    print(f"[OK] 表分片 {len(sheets)} 个，行 {total_rows} 条")
+    print(f"[OK] 表分片 {len(sheets)} 个，行 {total_rows} 条（仅数据字典使用）")
+    print(f"[OK] 索引分片 {len(shards)} 个 / 合计 {shard_b:,} B；首屏清单 {manifest_b:,} B")
     print(f"[OK] 精确编码 {len(exact)} 个 / 引用 {sum(len(v) for v in exact.values())} 条 / 区间码 {len(ranges)} 条")
     print(f"[OK] 断言 {'全部通过' if validation['ok'] else '存在失败项'}")
     print(f"[OK] 输出 = {args.out}")

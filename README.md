@@ -70,8 +70,8 @@ data/raw/       dip-3.0-source.xlsx（官方 xlsx 原样留存，供一键复现
 data/build/     生成的 SQLite 规则库
 pipeline/       extract.py（xlsx → SQLite）、validate.py（黄金断言）、export_web.py（导出静态页数据）
 schemas/        dataset.json 数据字典（字段、来源工作表、行数）
-web/            index.html 静态演示页 + data/（表分片、编码索引、断言结果）
-tests/          待补：往返一致性、覆盖率、CI
+web/            index.html 静态演示页 + data/（索引分片、表分片、断言结果）
+tests/          verify_export.py（分片自包含 + 查询口径回归）
 ```
 
 ## 在线演示页（纯静态，无需服务器）
@@ -84,8 +84,15 @@ python -m http.server 8000 -d web
 浏览器打开 `http://127.0.0.1:8000/`。三个板块：规则库查询（编码 → 病种与来源行号）、校验结果、数据字典浏览。
 
 页面数据全部由构建脚本生成；断言结果来自 `validate.collect_checks()` 真实运行，不是手写常量。
-编码索引处理了官方表的 `|` 多编码与 `-` 区间码；排除表与附表单独标注。
+编码索引按**编码首字符分片**：首屏只加载约 7 KB 的清单（`code_index.json`，含区间码、列名、表名、分片清单），查询时按需加载单个分片；每个分片自带命中行的字段内容，因此查询不再请求原始表。`sheets/*.json` 仅用于「数据字典」展开前 20 行。
+索引构建时处理官方表的 `|` 多编码与 `-` 区间码；排除表与附表单独标注。
 无后端、无数据库、无 CDN、无登录，可直接托管到 GitHub Pages / Cloudflare Pages。
+
+产物校验（可复跑，含 6 个示例编码的查询口径回归）：
+
+```bash
+python tests/verify_export.py
+```
 
 ## 尚未完成
 
