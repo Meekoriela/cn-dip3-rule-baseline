@@ -1,5 +1,8 @@
 # cn-dip3-rule-baseline
 
+[![verify](https://github.com/Meekoriela/cn-dip3-rule-baseline/actions/workflows/verify.yml/badge.svg)](https://github.com/Meekoriela/cn-dip3-rule-baseline/actions/workflows/verify.yml)
+[![License: BSD 3-Clause](https://img.shields.io/badge/license-BSD%203--Clause-blue.svg)](LICENSE)
+
 [English](README.en.md)
 
 基于国家医保局公开的《按病种分值（DIP）付费 3.0 版分组方案》构建的**可验证规则基线数据集**。
@@ -12,16 +15,26 @@
 > 目标是把官方 Excel 变成**可被引用、可复跑核对、带官方数字黄金断言**的数据产物：
 > 别人写分组器时，可以直接拿这里的规则库做基准。
 
-## P0 状态：已跑通
+## P0 状态：23 条断言全绿（CI 自动复跑）
 
 ```
 [PASS] 工作表解析数      =       10  (expected 10)
-[PASS] 核心病种总数      =     5125  (expected 5125 个)
-[PASS] 基层病种数        =      127  (expected 127 个)
+[PASS] 核心病种总数      =     5125  (expected 5125 个)   ← 官方公布口径
+[PASS] 基层病种数        =      127  (expected 127 个)   ← 官方公布口径
 [PASS] 源文件 SHA256 一致
+[PASS] 有效数据行总数    =    14154
+[PASS] 表 t01..t10 行数（10 条）
+[PASS] 分类 XQ/BX/FZ/JC 条数（4 条）
+[PASS] 竖线多编码单元格  =     1829
+[PASS] 区间码 token 数   =       54
+[PASS] t07 纯诊断入组    =     1960
+[PASS] 排除表行数合计    =     8853
+
 分类分布： BX=1725  FZ=113  JC=3268  XQ=19
-总行数：14154
+断言总数：23（官方口径 4 条 + 解析基线 19 条）
 ```
+
+**两类断言来源不同，README 与页面均单独标注**：4 条来自国家医保局公布口径；19 条是 2026-11-05 首次解析成功后锁定的结构快照，不是官方数字。后者的作用是防止「两条总数仍然绿、但解析口径已被改坏」——例如把 `|` 多编码或 `-` 区间码当普通字符串处理。
 
 ## 快速开始
 
@@ -37,6 +50,16 @@ python pipeline/validate.py --db data/build/dip_rules.db --source data/raw/dip-3
 ```
 
 换版本只换 `--source`，不改代码。
+
+## 持续验证（CI）
+
+`.github/workflows/verify.yml` 在每次 push / PR 时从**官方 xlsx 重新构建整条链路**：
+
+```
+extract.py → validate.py → export_web.py → verify_export.py → 产物一致性比对
+```
+
+最后一步把重建产物与仓库内已提交的 JSON / 分片逐一比对（排除构建时间戳），任一字节不同即失败。因此「可复现」不是 README 上的说法，而是每次提交都被机器核对的事实。徽章在 README 顶部。
 
 ## 数据源
 
@@ -98,10 +121,9 @@ python tests/verify_export.py
 
 - ICD-10 医保版 / ICD-9-CM-3 医保版全量编码表的来源与版本锁定（官方附件不含）
 - Parquet 导出
-- 往返一致性 / 病种库自回查覆盖率测试
-- CI 与徽章
+- 入组结果的往返一致性 / 病种库自回查覆盖率测试
 
-已完成：源 xlsx 随仓库分发，一键复现不依赖外部文件；静态演示页已上线 https://meekoriela.github.io/cn-dip3-rule-baseline/ 。
+已完成：源 xlsx 随仓库分发，一键复现不依赖外部文件；23 条断言与分片校验由 CI 每次自动复跑；静态演示页已上线 https://meekoriela.github.io/cn-dip3-rule-baseline/ 。
 
 ## 许可证与数据权利
 

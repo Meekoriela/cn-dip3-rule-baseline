@@ -1,0 +1,76 @@
+name: verify
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install openpyxl==3.1.5
+
+      - name: Rebuild rule database from the published workbook
+        run: |
+          python pipeline/extract.py \
+            --source data/raw/dip-3.0-source.xlsx \
+            --out data/build/dip_rules.db \
+            --dict schemas/dataset.json
+
+      - name: Golden assertions (official figures + locked parsing baseline)
+        run: |
+          python pipeline/validate.py \
+            --db data/build/dip_rules.db \
+            --source data/raw/dip-3.0-source.xlsx
+
+      - name: Regenerate static site data
+        run: |
+          python pipeline/export_web.py \
+            --db data/build/dip_rules.db \
+            --source data/raw/dip-3.0-source.xlsx
+
+      - name: Verify shards, self-containment and query regression
+        run: python tests/verify_export.py
+
+      - name: Verify committed artifacts are reproducible (timestamp excluded)
+        run: |
+          python - <<'PY'
+          import json, subprocess, sys
+          from pathlib import Path
+
+          # built_at is a wall-clock timestamp; exclude it when comparing.
+          # SQLite .db is not byte-compared (page layout is not deterministic);
+          # its logical content is covered by the 23 assertions instead.
+          def norm(path):
+              d = json.loads(Path(path).read_text(encoding="utf-8"))
+              if isinstance(d, dict) and isinstance(d.get("meta"), dict):
+                  d["meta"].pop("built_at", None)
+              return json.dumps(d, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+
+          targets = [Path("schemas/dataset.json")]
+          targets += sorted(Path("web/data").rglob("*.json"))
+          tmp = Path("/tmp/_committed.json")
+          bad = []
+          for p in targets:
+              r = subprocess.run(["git", "show", "HEAD:" + p.as_posix()],
+                                 capture_output=True, text=True)
+              if r.returncode != 0:
+                  bad.append(p.as_posix() + " (not committed)")
+                  continue
+              tmp.write_text(r.stdout, encoding="utf-8")
+              if norm(tmp) != norm(p):
+                  bad.append(p.as_posix())
+          if bad:
+              print("Reproducibility mismatch:", *bad, sep="\n  ")
+              sys.exit(1)
+          print(f"[PASS] {len(targets)} committed JSON artifacts match a fresh rebuild")
+          PY

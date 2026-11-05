@@ -1,5 +1,8 @@
 # cn-dip3-rule-baseline
 
+[![verify](https://github.com/Meekoriela/cn-dip3-rule-baseline/actions/workflows/verify.yml/badge.svg)](https://github.com/Meekoriela/cn-dip3-rule-baseline/actions/workflows/verify.yml)
+[![License: BSD 3-Clause](https://img.shields.io/badge/license-BSD%203--Clause-blue.svg)](LICENSE)
+
 [中文](README.md)
 
 A **verifiable rule baseline dataset** built from the publicly released *Diagnosis-Intervention Packet (DIP) 3.0 Grouping Scheme* (按病种分值（DIP）付费 3.0 版分组方案) published by China's National Healthcare Security Administration (NHSA).
@@ -9,16 +12,26 @@ A **verifiable rule baseline dataset** built from the publicly released *Diagnos
 
 > **Scope (revised 2026-11-05 after a competitive review):** several DIP 3.0 grouping engines already exist (the OpenDRG online DIP edition, `Jensen-Yang-CN/DRG-DIP`, etc.). This project is deliberately **not another grouper**. It turns the public Excel workbook into a **citable, reproducible dataset with gold-standard assertions**, so that others writing a grouper have an independent baseline to check against.
 
-## P0 status: passing
+## P0 status: 23 checks passing, re-run in CI
 
 ```
 [PASS] sheets parsed             =       10  (expected 10)
-[PASS] core diseases             =     5125  (expected 5125)
-[PASS] primary-care diseases     =      127  (expected 127)
+[PASS] core diseases             =     5125  (expected 5125)   <- published figure
+[PASS] primary-care diseases     =      127  (expected 127)    <- published figure
 [PASS] source SHA256 unchanged
+[PASS] total data rows           =    14154
+[PASS] per-sheet row counts (10 checks)
+[PASS] category XQ/BX/FZ/JC counts (4 checks)
+[PASS] pipe-separated code cells =     1829
+[PASS] range-code tokens         =       54
+[PASS] diagnosis-only rows (t07) =     1960
+[PASS] exclusion-table rows      =     8853
+
 Category breakdown: BX=1725  FZ=113  JC=3268  XQ=19
-Total rows: 14154
+Checks: 23 (4 published figures + 19 locked parsing-baseline checks)
 ```
+
+**Two different sources, labelled separately in both the README and the demo page.** Four checks come from figures published by the NHSA. The other 19 are a structural snapshot locked after the first successful parse on 2026-11-05 — they are *not* official figures. Their purpose is to catch a silently broken parser that would still pass the two headline totals, e.g. treating `|`-separated multi-codes or `-` range codes as plain strings.
 
 (The CLI prints Chinese labels; the numbers above are translated. Run `pipeline/validate.py` for the raw output.)
 
@@ -36,6 +49,16 @@ python pipeline/validate.py --db data/build/dip_rules.db --source data/raw/dip-3
 ```
 
 Changing the policy version means changing only `--source`; the code stays the same. The source workbook ships with the repository, so a clone can reproduce every artifact without external files.
+
+## Continuous verification (CI)
+
+`.github/workflows/verify.yml` rebuilds the whole pipeline from the published workbook on every push and pull request:
+
+```
+extract.py -> validate.py -> export_web.py -> verify_export.py -> artifact comparison
+```
+
+The last step compares every regenerated JSON / shard against the committed copy (excluding the build timestamp) and fails on any byte difference. Reproducibility is therefore verified by a machine on each commit, not merely claimed in the README. The badge is at the top of this file.
 
 ## Data source
 
@@ -93,7 +116,7 @@ python tests/verify_export.py
 - Source and version pinning for the full ICD-10 / ICD-9-CM-3 medical-insurance code tables (not included in the official attachments)
 - Parquet export
 - Round-trip consistency and disease-library self-lookup coverage tests
-- CI and badges
+- Round-trip consistency and self-lookup coverage tests for grouping results
 
 ## License and data rights
 
