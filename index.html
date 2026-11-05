@@ -87,6 +87,7 @@
   .tag{display:inline-block;background:var(--accentbg);color:var(--accent);border-radius:5px;
     padding:2px 9px;font-size:13px;margin-right:6px}
   .tag.excl{background:var(--warnbg);color:var(--warn)}
+  .tag.base{background:#f0f2f5;color:var(--tx2)}
   .rowitem{border:1px solid var(--line);border-radius:9px;padding:16px 18px;margin-bottom:12px;background:#fff;
     transition:border-color .2s ease,transform .2s ease}
   .rowitem:hover{border-color:#c9d8ee;transform:translateX(2px)}
@@ -342,13 +343,18 @@ function renderValidation(){
   h+='<div class="stat"><div class="top">'+ICON('i-chart')+'核心病种</div><div class="n">'+num(validation.core_total)+'</div></div>';
   h+='<div class="stat"><div class="top">'+ICON('i-shield')+'基层病种</div><div class="n">'+num(validation.primary_total)+'</div></div>';
   h+='</div>';
-  h+='<div class="card"><h2>'+ICON('i-check','ic lg')+'黄金断言</h2>'+
-     '<p class="hint" style="margin-top:0">断言结果由 <code>validate.collect_checks()</code> 真实运行生成，不是手写常量。</p>'+
-     '<table><thead><tr><th>断言</th><th>实测</th><th>期望</th><th>结果</th></tr></thead><tbody>';
-  (validation.checks||[]).forEach(c=>{
+  const checks=validation.checks||[], passed=checks.filter(c=>c.passed).length;
+  h+='<div class="card"><h2>'+ICON('i-check','ic lg')+'断言 '+passed+' / '+checks.length+' 通过</h2>'+
+     '<p class="hint" style="margin-top:0">断言结果由 <code>validate.collect_checks()</code> 真实运行生成，不是手写常量。'+
+     '<span class="tag">官方</span>= 国家医保局公布口径；<span class="tag base">基线</span>= 首次解析成功后的实测快照（非官方数字），用于锁定解析口径。'+
+     (validation.origin_note?'':'')+'</p>'+
+     '<table><thead><tr><th>断言</th><th>来源</th><th>实测</th><th>期望</th><th>结果</th></tr></thead><tbody>';
+  checks.forEach(c=>{
     let actual=String(c.actual);
     if(c.label.indexOf('SHA256')>=0) actual=actual.slice(0,16)+'…';
-    h+='<tr><td>'+esc(c.label)+'</td><td class="mono">'+esc(actual)+'</td><td class="mono">'+esc(c.expected)+
+    const off=c.origin==='官方';
+    h+='<tr><td>'+esc(c.label)+'</td><td><span class="tag'+(off?'':' base')+'">'+esc(c.origin||'基线')+
+       '</span></td><td class="mono">'+esc(actual)+'</td><td class="mono">'+esc(c.expected)+
        '</td><td><span class="badge '+(c.passed?'ok':'no')+'">'+(c.passed?ICON('i-check'):'')+(c.passed?'PASS':'FAIL')+'</span></td></tr>';
   });
   h+='</tbody></table></div>';
