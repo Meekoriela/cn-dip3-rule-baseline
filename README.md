@@ -94,6 +94,15 @@ python -m http.server 8000 -d web
 - 发布到 GitHub Pages（需建仓、push、开启 Pages；属对外发布动作，未执行）
 - 源 xlsx 已随仓库分发，一键复现链路不依赖外部文件
 
+## 许可证与数据权利
+
+| 范围 | 适用文件 | 依据 |
+|---|---|---|
+| 原创代码 | `pipeline/*.py`、`web/index.html`、README、脚本与配置 | `LICENSE`（BSD 3-Clause） |
+| 官方数据及其派生 | `data/raw/`、`data/build/`、`web/data/`、`schemas/dataset.json` | `DATA_NOTICE.md`，**不适用** BSD-3-Clause |
+
+BSD-3-Clause 第 3 条禁止以作者或贡献者名义为衍生产品背书。官方数据的权利归发布方，本仓库不主张权利、不提供再授权；使用前请自行核对官方最新版本与地方实施细则。
+
 ## 免责声明
 
 仅使用国家医保局公开数据，不接触任何真实病案数据。
