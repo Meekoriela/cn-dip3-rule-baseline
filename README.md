@@ -1,5 +1,7 @@
 # cn-dip3-rule-baseline
 
+[English](README.en.md)
+
 基于国家医保局公开的《按病种分值（DIP）付费 3.0 版分组方案》构建的**可验证规则基线数据集**。
 
 > 本项目为独立研究实现，与发布机构无隶属关系，**未获任何官方认证**。
@@ -91,8 +93,8 @@ python -m http.server 8000 -d web
 - Parquet 导出
 - 往返一致性 / 病种库自回查覆盖率测试
 - CI 与徽章
-- 发布到 GitHub Pages（需建仓、push、开启 Pages；属对外发布动作，未执行）
-- 源 xlsx 已随仓库分发，一键复现链路不依赖外部文件
+
+已完成：源 xlsx 随仓库分发，一键复现不依赖外部文件；静态演示页已上线 https://meekoriela.github.io/cn-dip3-rule-baseline/ 。
 
 ## 许可证与数据权利
 

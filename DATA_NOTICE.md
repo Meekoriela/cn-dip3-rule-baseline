@@ -1,5 +1,7 @@
 # 数据权利与来源声明
 
+[English](DATA_NOTICE.en.md)
+
 ## 数据来源
 
 | 项 | 值 |

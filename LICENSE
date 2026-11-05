@@ -27,16 +27,3 @@ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
 CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
----
-
-Scope notice (project-specific, not part of the standard BSD 3-Clause text)
-
-This license covers only the original code and documentation authored for
-this repository: pipeline/*.py, web/index.html, README.md, build scripts and
-configuration.
-
-It does NOT cover data/raw/, data/build/, web/data/ or schemas/dataset.json.
-Those files are derived from public files published by the National Healthcare
-Security Administration; their rights remain with the publisher. See
-DATA_NOTICE.md for provenance, scope of use and required attribution.
