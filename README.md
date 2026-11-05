@@ -41,25 +41,39 @@
 需要 Python 3.10+ 与 `openpyxl`。
 
 ```bash
-pip install openpyxl
+pip install openpyxl pyarrow
 python pipeline/extract.py \
   --source data/raw/dip-3.0-source.xlsx \
   --out data/build/dip_rules.db \
   --dict schemas/dataset.json
 python pipeline/validate.py --db data/build/dip_rules.db --source data/raw/dip-3.0-source.xlsx
+python pipeline/export_parquet.py
+python tests/verify_roundtrip.py
 ```
 
-换版本只换 `--source`，不改代码。
+换版本只换 `--source`，不改代码。Parquet 为可选依赖，只要 `pyarrow`。
 
 ## 持续验证（CI）
 
 `.github/workflows/verify.yml` 在每次 push / PR 时从**官方 xlsx 重新构建整条链路**：
 
 ```
-extract.py → validate.py → export_web.py → verify_export.py → 产物一致性比对
+extract.py → validate.py → export_web.py → export_parquet.py
+           → verify_export.py → verify_roundtrip.py → 产物一致性比对
 ```
 
-最后一步把重建产物与仓库内已提交的 JSON / 分片逐一比对（排除构建时间戳），任一字节不同即失败。因此「可复现」不是 README 上的说法，而是每次提交都被机器核对的事实。徽章在 README 顶部。
+最后一步把重建产物与仓库内已提交的 JSON / 分片 / Parquet manifest 逐一比对（排除构建时间戳与跨平台字节差异），任一不同即失败。因此「可复现」不是 README 上的说法，而是每次提交都被机器核对的事实。徽章在 README 顶部。
+
+`verify_roundtrip.py` 提供三个数据层闭环指标：
+
+| 指标 | 实测 |
+|---|---|
+| 索引往返一致性 | 22974 条引用全部能指回原行并命中该编码，失配 0 |
+| 核心病种有效编码自回查覆盖率 | **5084 / 5084 = 100%** |
+| 排除项口径 | 区间码 26 条 + 说明性文字「所有诊断」15 条 = 41 条，不计入分母；含排除项总覆盖 99.20% |
+| 三种形态行数 | SQLite / JSON 分片 / Parquet 逐表对齐，10 张表全一致 |
+
+「所有诊断」是官方先期分组表里表示「不限诊断」的说明性文字，不是编码，索引按设计过滤；把它算成未命中会低估覆盖率，所以口径单独列出。`data/parquet/` 让数据集可直接被 pandas / DuckDB 读取，不必先跑 Python 管线。
 
 ## 数据源
 
@@ -91,10 +105,13 @@ extract.py → validate.py → export_web.py → verify_export.py → 产物一�
 ```
 data/raw/       dip-3.0-source.xlsx（官方 xlsx 原样留存，供一键复现）
 data/build/     生成的 SQLite 规则库
-pipeline/       extract.py（xlsx → SQLite）、validate.py（黄金断言）、export_web.py（导出静态页数据）
+data/parquet/   10 张表的 Parquet（zstd），供 pandas / DuckDB 直接读取
+pipeline/       extract.py、validate.py、export_web.py、export_parquet.py
 schemas/        dataset.json 数据字典（字段、来源工作表、行数）
+docs/           CODING_STANDARDS.md 编码体系与版本口径（中英）
 web/            index.html 静态演示页 + data/（索引分片、表分片、断言结果）
 tests/          verify_export.py（分片自包含 + 查询口径回归）
+                verify_roundtrip.py（往返一致性 + 自回查覆盖率 + 三形态行数对齐）
 ```
 
 ## 在线演示页（纯静态，无需服务器）
@@ -117,20 +134,23 @@ python -m http.server 8000 -d web
 python tests/verify_export.py
 ```
 
+## 编码体系说明
+
+**本项目不内嵌、也不锁定某一版 ICD 全量编码表**——这是核查后的结论，不是遗漏。官方 DIP 3.0 附件只含病种目录与编码片段；全量 ICD-10 医保版 / ICD-9-CM-3 医保版由国家医保信息业务编码标准数据库**动态维护**（`code.nhsa.gov.cn`），且 `医保办函〔2025〕141号` 在 2025-12-31 又调整了手术操作代码，因此写死「2.0 版」会给出一个看似确定、实际过期的版本号。完整依据、查询入口与编码结构见 `docs/CODING_STANDARDS.md`。
+
 ## 尚未完成
 
-- ICD-10 医保版 / ICD-9-CM-3 医保版全量编码表的来源与版本锁定（官方附件不含）
-- Parquet 导出
-- 入组结果的往返一致性 / 病种库自回查覆盖率测试
+- 无阻塞项。后续可选：ICD 全量编码表与 DIP 目录的版本对照（需以动态维护平台当期版本为准，且权利归发布方）
+- 可选：DRG / DIP 双口径对照（已有多个现成实现，简历收益低）
 
-已完成：源 xlsx 随仓库分发，一键复现不依赖外部文件；23 条断言与分片校验由 CI 每次自动复跑；静态演示页已上线 https://meekoriela.github.io/cn-dip3-rule-baseline/ 。
+已完成：源 xlsx 随仓库分发，一键复现不依赖外部文件；23 条断言、分片校验、往返一致性由 CI 每次自动复跑；SQLite / JSON / Parquet 三种数据形态；`v0.1.0` release 可引用；静态演示页已上线 https://meekoriela.github.io/cn-dip3-rule-baseline/ 。
 
 ## 许可证与数据权利
 
 | 范围 | 适用文件 | 依据 |
 |---|---|---|
-| 原创代码 | `pipeline/*.py`、`web/index.html`、README、脚本与配置 | `LICENSE`（BSD 3-Clause） |
-| 官方数据及其派生 | `data/raw/`、`data/build/`、`web/data/`、`schemas/dataset.json` | `DATA_NOTICE.md`，**不适用** BSD-3-Clause |
+| 原创代码 | `pipeline/*.py`、`tests/*.py`、`docs/*.md`、`web/index.html`、README、脚本与配置 | `LICENSE`（BSD 3-Clause） |
+| 官方数据及其派生 | `data/raw/`、`data/build/`、`data/parquet/`、`web/data/`、`schemas/dataset.json` | `DATA_NOTICE.md`，**不适用** BSD-3-Clause |
 
 BSD-3-Clause 第 3 条禁止以作者或贡献者名义为衍生产品背书。官方数据的权利归发布方，本仓库不主张权利、不提供再授权；使用前请自行核对官方最新版本与地方实施细则。
 

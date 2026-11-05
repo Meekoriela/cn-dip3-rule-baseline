@@ -17,7 +17,7 @@ jobs:
           python-version: '3.11'
 
       - name: Install dependencies
-        run: pip install openpyxl==3.1.5
+        run: pip install openpyxl==3.1.5 pyarrow==26.0.1
 
       - name: Rebuild rule database from the published workbook
         run: |
@@ -38,8 +38,14 @@ jobs:
             --db data/build/dip_rules.db \
             --source data/raw/dip-3.0-source.xlsx
 
+      - name: Export Parquet
+        run: python pipeline/export_parquet.py --db data/build/dip_rules.db
+
       - name: Verify shards, self-containment and query regression
         run: python tests/verify_export.py
+
+      - name: Verify round-trip consistency and self-lookup coverage
+        run: python tests/verify_roundtrip.py
 
       - name: Verify committed artifacts are reproducible (timestamp excluded)
         run: |
@@ -48,16 +54,24 @@ jobs:
           from pathlib import Path
 
           # built_at is a wall-clock timestamp; exclude it when comparing.
-          # SQLite .db is not byte-compared (page layout is not deterministic);
-          # its logical content is covered by the 23 assertions instead.
+          # SQLite .db and .parquet binaries are not byte-compared across
+          # platforms; their logical content is covered by the 23 assertions
+          # and verify_roundtrip.py (row counts + readback) instead.
           def norm(path):
               d = json.loads(Path(path).read_text(encoding="utf-8"))
               if isinstance(d, dict) and isinstance(d.get("meta"), dict):
                   d["meta"].pop("built_at", None)
+              # Parquet byte size can differ slightly across platforms; row
+              # counts are the contract and are checked by verify_roundtrip.py.
+              if isinstance(d, dict) and isinstance(d.get("tables"), list):
+                  for t in d["tables"]:
+                      if isinstance(t, dict):
+                          t.pop("bytes", None)
               return json.dumps(d, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
 
           targets = [Path("schemas/dataset.json")]
           targets += sorted(Path("web/data").rglob("*.json"))
+          targets += [Path("data/parquet/manifest.json")]
           tmp = Path("/tmp/_committed.json")
           bad = []
           for p in targets:

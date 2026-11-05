@@ -40,25 +40,39 @@ Checks: 23 (4 published figures + 19 locked parsing-baseline checks)
 Requires Python 3.10+ and `openpyxl`.
 
 ```bash
-pip install openpyxl
+pip install openpyxl pyarrow
 python pipeline/extract.py \
   --source data/raw/dip-3.0-source.xlsx \
   --out data/build/dip_rules.db \
   --dict schemas/dataset.json
 python pipeline/validate.py --db data/build/dip_rules.db --source data/raw/dip-3.0-source.xlsx
+python pipeline/export_parquet.py
+python tests/verify_roundtrip.py
 ```
 
-Changing the policy version means changing only `--source`; the code stays the same. The source workbook ships with the repository, so a clone can reproduce every artifact without external files.
+Changing the policy version means changing only `--source`; the code stays the same. The source workbook ships with the repository, so a clone can reproduce every artifact without external files. Parquet is optional and requires `pyarrow`.
 
 ## Continuous verification (CI)
 
 `.github/workflows/verify.yml` rebuilds the whole pipeline from the published workbook on every push and pull request:
 
 ```
-extract.py -> validate.py -> export_web.py -> verify_export.py -> artifact comparison
+extract.py -> validate.py -> export_web.py -> export_parquet.py
+           -> verify_export.py -> verify_roundtrip.py -> artifact comparison
 ```
 
-The last step compares every regenerated JSON / shard against the committed copy (excluding the build timestamp) and fails on any byte difference. Reproducibility is therefore verified by a machine on each commit, not merely claimed in the README. The badge is at the top of this file.
+The last step compares every regenerated JSON / shard / Parquet manifest against the committed copy (excluding the build timestamp and cross-platform byte-size differences) and fails on any difference. Reproducibility is therefore verified by a machine on each commit, not merely claimed in the README. The badge is at the top of this file.
+
+`verify_roundtrip.py` provides three data-layer closure metrics:
+
+| Metric | Measured |
+|---|---|
+| Index round-trip | 22974 references all resolve back to their row and code; 0 mismatches |
+| Self-lookup coverage of valid core-disease codes | **5084 / 5084 = 100%** |
+| Excluded by definition | 26 range codes + 15 descriptive cells ("所有诊断" / all diagnoses) = 41; overall coverage including exclusions 99.20% |
+| Three formats | SQLite / JSON shards / Parquet row counts match across all 10 tables |
+
+"所有诊断" is a descriptive phrase in the official early-grouping table meaning "any diagnosis", not a code; the index filters it by design. Counting it as a miss would understate coverage, so the exclusion is reported separately. `data/parquet/` lets pandas / DuckDB read the dataset directly without running the Python pipeline.
 
 ## Data source
 
@@ -88,10 +102,13 @@ The parser counts core diseases by the value domain of the `分类` column (`XQ 
 ```
 data/raw/       dip-3.0-source.xlsx (verbatim source workbook)
 data/build/     generated SQLite rule database
-pipeline/       extract.py (xlsx -> SQLite), validate.py (gold assertions), export_web.py (static site data)
+data/parquet/   10 Parquet tables (zstd), readable directly by pandas / DuckDB
+pipeline/       extract.py, validate.py, export_web.py, export_parquet.py
 schemas/        dataset.json data dictionary (fields, source sheets, row counts)
+docs/           CODING_STANDARDS.md coding-system scope and version policy
 web/            index.html static demo + data/ (index shards, sheet shards, assertion results)
 tests/          verify_export.py (shard self-containment + query regression)
+                verify_roundtrip.py (round-trip + self-lookup + cross-format row counts)
 ```
 
 ## Live demo (pure static, no server required)
@@ -111,19 +128,23 @@ Reproducible artifact check (includes query regression on six sample codes):
 python tests/verify_export.py
 ```
 
+## Coding-system scope
+
+**This project deliberately does not embed or pin a complete ICD code table.** The published DIP 3.0 workbook contains only disease catalogue entries and code fragments; the full ICD-10 / ICD-9-CM-3 medical-insurance dictionaries are **continuously maintained** by the NHSA coding standards platform (`code.nhsa.gov.cn`), and `医保办函〔2025〕141号` (2025-12-31) adjusted procedure codes again. Hard-coding "edition 2.0" would produce a version number that looks authoritative but is already stale. Full evidence, query entry points and code structure: `docs/CODING_STANDARDS.md` (Chinese) and `docs/CODING_STANDARDS.en.md`.
+
 ## Roadmap
 
-- Source and version pinning for the full ICD-10 / ICD-9-CM-3 medical-insurance code tables (not included in the official attachments)
-- Parquet export
-- Round-trip consistency and disease-library self-lookup coverage tests
-- Round-trip consistency and self-lookup coverage tests for grouping results
+- No blocking items. Optional: version comparison between the full ICD dictionaries and the DIP catalogue (must use the currently effective version from the maintenance platform; rights remain with the publisher)
+- Optional: DRG / DIP dual-scheme comparison (several implementations already exist; low resume value)
+
+Completed: source workbook shipped for one-command rebuild; 23 assertions, shard checks and round-trip tests re-run in CI; SQLite / JSON / Parquet formats; `v0.1.0` release; live static demo at https://meekoriela.github.io/cn-dip3-rule-baseline/ .
 
 ## License and data rights
 
 | Scope | Files | Governing document |
 |---|---|---|
 | Original code | `pipeline/*.py`, `web/index.html`, README, scripts and config | `LICENSE` (BSD 3-Clause) |
-| Official data and derivatives | `data/raw/`, `data/build/`, `web/data/`, `schemas/dataset.json` | `DATA_NOTICE.md` — **not** covered by BSD-3-Clause |
+| Official data and derivatives | `data/raw/`, `data/build/`, `data/parquet/`, `web/data/`, `schemas/dataset.json` | `DATA_NOTICE.md` — **not** covered by BSD-3-Clause |
 
 Clause 3 of BSD-3-Clause prohibits using the author's or contributors' names to endorse derived products. Rights in the official data remain with the publisher; this repository claims no rights and grants no sublicense. Verify the latest official version and local implementation rules before use. See [DATA_NOTICE.en.md](DATA_NOTICE.en.md).
 
