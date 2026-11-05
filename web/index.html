@@ -7,122 +7,277 @@
 <style>
   :root{
     --bg:#f7f8fa; --card:#ffffff; --line:#e3e6ea; --line2:#eef0f3;
-    --tx:#1f2328; --tx2:#5b6570; --tx3:#8a939d;
+    --tx:#1f2328; --tx2:#5b6570; --tx3:#66717d;
     --ok:#1d7a55; --okbg:#e8f5ef; --warn:#a8620d; --warnbg:#fdf3e3;
     --accent:#1f5fa8; --accentbg:#eaf1fb;
+    --r:10px;
   }
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:var(--tx);
-    font:14px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
-  .wrap{max-width:1080px;margin:0 auto;padding:28px 20px 60px}
-  header{border-bottom:1px solid var(--line);padding-bottom:18px;margin-bottom:22px}
-  h1{font-size:20px;font-weight:600;margin:0 0 6px}
-  .sub{color:var(--tx2);font-size:13px;margin:0}
-  .disclaim{color:var(--tx3);font-size:12px;margin-top:10px}
-  nav{display:flex;gap:6px;margin-bottom:20px;border-bottom:1px solid var(--line)}
-  nav button{background:none;border:none;border-bottom:2px solid transparent;padding:9px 16px;
-    font:inherit;color:var(--tx2);cursor:pointer}
+    font:16px/1.7 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
+  .wrap{max-width:1180px;margin:0 auto;padding:40px 24px 72px}
+  .ic{width:18px;height:18px;flex:none;display:inline-block;vertical-align:-3px}
+  .ic.lg{width:24px;height:24px;vertical-align:-5px}
+  .ic.xl{width:52px;height:52px;vertical-align:0}
+  header{border-bottom:1px solid var(--line);padding-bottom:24px;margin-bottom:28px}
+  .brand{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  .mark{width:38px;height:38px;border-radius:11px;background:var(--accent);color:#fff;
+    display:flex;align-items:center;justify-content:center;flex:none}
+  .mark .ic{width:22px;height:22px}
+  h1{font-size:30px;line-height:1.25;font-weight:600;margin:0;letter-spacing:-.3px}
+  .sub{color:var(--tx2);font-size:16px;margin:10px 0 0}
+  .disclaim{color:var(--tx3);font-size:13px;margin-top:12px;line-height:1.65}
+  nav{display:flex;gap:8px;margin-bottom:28px;border-bottom:1px solid var(--line);overflow-x:auto}
+  nav button{background:none;border:none;border-bottom:2px solid transparent;padding:12px 20px;
+    font:inherit;color:var(--tx2);cursor:pointer;white-space:nowrap;
+    display:flex;align-items:center;gap:8px;
+    transition:color .2s ease,background .2s ease,border-color .2s ease}
+  nav button:hover{color:var(--accent);background:var(--accentbg)}
   nav button.on{color:var(--accent);border-bottom-color:var(--accent);font-weight:600}
   .panel{display:none}.panel.on{display:block}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px;margin-bottom:16px}
-  .search{display:flex;gap:10px;flex-wrap:wrap}
-  input[type=text]{flex:1;min-width:260px;padding:10px 12px;border:1px solid var(--line);
-    border-radius:8px;font:inherit;background:#fff;color:var(--tx)}
-  input[type=text]:focus{outline:none;border-color:var(--accent)}
-  .btn{padding:10px 20px;border:1px solid var(--accent);background:var(--accent);color:#fff;
-    border-radius:8px;font:inherit;cursor:pointer}
-  .chips{margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-  .chips span{color:var(--tx3);font-size:12px;margin-right:2px}
+  .panel.on>*{animation:rise .38s ease both}
+  .panel.on>*:nth-child(2){animation-delay:.06s}
+  .panel.on>*:nth-child(3){animation-delay:.12s}
+  @keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+    padding:24px;margin-bottom:20px;transition:border-color .2s ease}
+  .card:hover{border-color:#d4dae2}
+  .card h2{font-size:18px;font-weight:600;margin:0 0 6px;display:flex;align-items:center;gap:9px}
+  .search{display:flex;gap:12px;flex-wrap:wrap}
+  .inputbox{position:relative;flex:1;min-width:260px}
+  .inputbox .ic{position:absolute;left:16px;top:50%;transform:translateY(-50%);color:var(--tx3)}
+  input[type=text]{width:100%;padding:13px 16px 13px 44px;border:1px solid var(--line);
+    border-radius:9px;font:inherit;background:#fff;color:var(--tx);
+    transition:border-color .2s ease,box-shadow .2s ease}
+  input[type=text]:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accentbg)}
+  .btn{padding:13px 26px;border:1px solid var(--accent);background:var(--accent);color:#fff;
+    border-radius:9px;font:inherit;font-weight:600;cursor:pointer;
+    display:flex;align-items:center;gap:8px;
+    transition:transform .2s ease,background .2s ease}
+  .btn:hover{transform:translateY(-2px);background:#174d8b}
+  .btn:active{transform:scale(.97)}
+  .chips{margin-top:16px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .chips>span{color:var(--tx3);font-size:14px;margin-right:2px}
   .chip{border:1px solid var(--line);background:#fff;color:var(--tx2);border-radius:20px;
-    padding:4px 12px;font-size:12px;cursor:pointer;font-family:ui-monospace,Consolas,monospace}
-  .chip:hover{border-color:var(--accent);color:var(--accent)}
-  .hint{color:var(--tx3);font-size:12px;margin-top:10px}
-  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:16px}
-  .stat{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
-  .stat .n{font-size:22px;font-weight:600;font-variant-numeric:tabular-nums}
-  .stat .l{font-size:12px;color:var(--tx2);margin-top:2px}
+    padding:6px 14px;font-size:14px;cursor:pointer;font-family:ui-monospace,Consolas,monospace;
+    transition:transform .2s ease,border-color .2s ease,color .2s ease,background .2s ease}
+  .chip:hover{transform:translateY(-2px);border-color:var(--accent);color:var(--accent);background:var(--accentbg)}
+  .hint{color:var(--tx3);font-size:14px;margin:12px 0 0;line-height:1.65}
+  .idxstate{display:flex;align-items:center;gap:7px;font-size:13px;color:var(--tx3);margin-top:12px}
+  .idxstate .dot{width:8px;height:8px;border-radius:50%;background:var(--warn);flex:none;
+    animation:pulse 1.4s ease-in-out infinite}
+  .idxstate.ready .dot{background:var(--ok);animation:none}
+  @keyframes pulse{0%,100%{opacity:.35}50%{opacity:1}}
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:20px}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+    padding:20px 22px;transition:transform .2s ease,border-color .2s ease}
+  .stat:hover{transform:translateY(-3px);border-color:#c9d8ee}
+  .stat .top{display:flex;align-items:center;gap:8px;color:var(--tx3);font-size:14px}
+  .stat .top .ic{color:var(--accent)}
+  .stat .n{font-size:32px;line-height:1.2;font-weight:600;margin-top:8px;font-variant-numeric:tabular-nums}
   .pass{color:var(--ok)}.fail{color:#b42318}
-  .badge{display:inline-block;padding:2px 9px;border-radius:5px;font-size:12px;font-weight:600}
+  .badge{display:inline-flex;align-items:center;gap:5px;padding:3px 11px;border-radius:6px;font-size:14px;font-weight:600}
   .badge.ok{background:var(--okbg);color:var(--ok)}
   .badge.no{background:#fdeaea;color:#b42318}
-  table{width:100%;border-collapse:collapse;font-size:13px}
-  th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line2);vertical-align:top}
+  table{width:100%;border-collapse:collapse;font-size:15px}
+  th,td{text-align:left;padding:12px 14px;border-bottom:1px solid var(--line2);vertical-align:top}
   th{color:var(--tx2);font-weight:600;background:#fafbfc}
   tr:last-child td{border-bottom:none}
-  .mono{font-family:ui-monospace,Consolas,monospace;font-size:12px}
-  .tag{display:inline-block;background:var(--accentbg);color:var(--accent);border-radius:4px;
-    padding:1px 7px;font-size:11px;margin-right:5px}
+  .mono{font-family:ui-monospace,Consolas,monospace;font-size:14px}
+  .tag{display:inline-block;background:var(--accentbg);color:var(--accent);border-radius:5px;
+    padding:2px 9px;font-size:13px;margin-right:6px}
   .tag.excl{background:var(--warnbg);color:var(--warn)}
-  .rowitem{border:1px solid var(--line);border-radius:8px;padding:12px 14px;margin-bottom:10px;background:#fff}
-  .rowmeta{color:var(--tx3);font-size:12px;margin-bottom:6px}
-  .kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:4px 18px;font-size:13px}
+  .rowitem{border:1px solid var(--line);border-radius:9px;padding:16px 18px;margin-bottom:12px;background:#fff;
+    transition:border-color .2s ease,transform .2s ease}
+  .rowitem:hover{border-color:#c9d8ee;transform:translateX(2px)}
+  .rowmeta{color:var(--tx3);font-size:14px;margin-bottom:9px}
+  .kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:6px 20px;font-size:15px}
   .kv div{overflow-wrap:anywhere}
-  .kv b{color:var(--tx2);font-weight:500;margin-right:6px}
-  details{background:var(--card);border:1px solid var(--line);border-radius:10px;margin-bottom:10px;padding:0 16px}
-  summary{cursor:pointer;padding:14px 0;font-weight:600;display:flex;justify-content:space-between;gap:12px}
-  summary .cnt{color:var(--tx3);font-weight:400;font-size:12px}
-  details .inner{border-top:1px solid var(--line2);padding:12px 0 16px;overflow-x:auto}
-  .loading{color:var(--tx3);padding:20px 0}
-  .err{color:#b42318;background:#fdeaea;border:1px solid #f5c6c6;border-radius:8px;padding:12px}
-  footer{color:var(--tx3);font-size:12px;margin-top:32px;border-top:1px solid var(--line);padding-top:14px}
+  .kv b{color:var(--tx2);font-weight:500;margin-right:8px}
+  details{background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+    margin-bottom:12px;padding:0 20px;transition:border-color .2s ease}
+  details[open]{border-color:#c9d8ee}
+  summary{cursor:pointer;padding:17px 0;font-weight:600;font-size:17px;
+    display:flex;justify-content:space-between;gap:12px;align-items:center;list-style:none}
+  summary::-webkit-details-marker{display:none}
+  summary .left{display:flex;align-items:center;gap:10px}
+  summary .left .ic{color:var(--accent)}
+  summary .cnt{color:var(--tx3);font-weight:400;font-size:14px}
+  summary .chev{color:var(--tx3);transition:transform .2s ease}
+  details[open] summary .chev{transform:rotate(90deg)}
+  details .inner{border-top:1px solid var(--line2);padding:16px 0 20px;overflow-x:auto;
+    animation:rise .28s ease both}
+  .loading{color:var(--tx3)}
+  .err{color:#b42318;background:#fdeaea;border:1px solid #f5c6c6;border-radius:9px;padding:16px}
+  .skel{background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+    padding:24px;margin-bottom:20px}
+  .skel .srow{display:flex;align-items:center;gap:14px;margin-bottom:16px}
+  .skel .srow:last-child{margin-bottom:0}
+  .skbar{background:var(--line2);border-radius:6px;height:15px;animation:shimmer 1.2s ease-in-out infinite}
+  .skbar.w1{width:34%}.skbar.w2{width:62%}.skbar.w3{width:48%}.skbar.w4{width:80%}
+  .skdot{width:26px;height:26px;border-radius:8px;background:var(--line2);flex:none;
+    animation:shimmer 1.2s ease-in-out infinite}
+  @keyframes shimmer{0%,100%{opacity:.4}50%{opacity:1}}
+  .bars{margin-top:18px}
+  .barrow{display:grid;grid-template-columns:200px 1fr 76px;align-items:center;gap:16px;margin-bottom:14px}
+  .barrow .bl{font-size:15px;color:var(--tx2)}
+  .barrow .bl b{color:var(--tx);font-family:ui-monospace,Consolas,monospace;margin-right:8px}
+  .btrack{height:16px;background:var(--line2);border-radius:8px;overflow:hidden}
+  .bfill{display:block;height:100%;border-radius:8px;background:var(--accent);
+    transform-origin:left;animation:grow .75s cubic-bezier(.2,.7,.3,1) both;
+    animation-delay:calc(var(--i)*90ms)}
+  .barrow:nth-child(4) .bfill{background:#3b82c4}
+  @keyframes grow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+  .barrow .bv{text-align:right;font-variant-numeric:tabular-nums;font-weight:600;font-size:15px}
+  .flow{display:flex;align-items:stretch;gap:10px;flex-wrap:wrap;margin-top:18px}
+  .fnode{flex:1;min-width:150px;background:#f7f9fc;border:1px solid var(--line);
+    border-radius:9px;padding:16px 18px;animation:rise .4s ease both;
+    animation-delay:calc(var(--i)*80ms)}
+  .fnode .fc{display:inline-block;font-family:ui-monospace,Consolas,monospace;font-weight:600;
+    color:var(--accent);background:var(--accentbg);border-radius:5px;padding:1px 8px;font-size:14px}
+  .fnode .fn{display:block;font-size:16px;font-weight:600;margin-top:9px}
+  .fnode small{display:block;color:var(--tx3);font-size:13px;margin-top:4px}
+  .farrow{display:flex;align-items:center;color:var(--tx3);font-size:20px;flex:none}
+  .empty{text-align:center;padding:44px 24px}
+  .empty .ic{color:#b9c4d0;margin-bottom:12px}
+  .empty b{display:block;font-size:18px;margin-bottom:6px}
+  .empty .hint{margin-top:6px}
+  footer{color:var(--tx3);font-size:14px;margin-top:40px;border-top:1px solid var(--line);padding-top:18px;line-height:1.8}
+  a{color:var(--accent)}
+  :focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:4px}
+  @media (max-width:700px){
+    .wrap{padding:24px 16px 48px}
+    h1{font-size:24px}
+    .card{padding:18px}
+    .stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+    .stat{padding:16px}
+    .stat .n{font-size:26px}
+    .inputbox{min-width:100%}
+    .btn{flex:1;justify-content:center}
+    .barrow{grid-template-columns:110px 1fr 62px;gap:10px}
+    .barrow .bl{font-size:13px}
+    .flow{flex-direction:column}
+    .farrow{justify-content:center;transform:rotate(90deg)}
+    table{font-size:14px}
+    th,td{padding:10px 8px}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;
+      transition-duration:.01ms!important}
+  }
 </style>
 </head>
 <body>
+<svg xmlns="http://www.w3.org/2000/svg" style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true">
+  <symbol id="i-db" viewBox="0 0 24 24"><ellipse cx="12" cy="5.5" rx="8" ry="3" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M4 5.5v13c0 1.7 3.6 3 8 3s8-1.3 8-3v-13" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3" fill="none" stroke="currentColor" stroke-width="1.8"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="1.9"/><path d="M15.5 15.5 21 21" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="m7.5 12.5 3 3 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-book" viewBox="0 0 24 24"><path d="M4 4.5h7a2.5 2.5 0 0 1 2.5 2.5V21a2.5 2.5 0 0 0-2.5-2H4z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M20 4.5h-4a2.5 2.5 0 0 0-2.5 2.5V21a2.5 2.5 0 0 1 2.5-2h4z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></symbol>
+  <symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 20V4M4 20h16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><rect x="7" y="12" width="3.5" height="5" fill="currentColor"/><rect x="12.5" y="9" width="3.5" height="8" fill="currentColor"/><rect x="18" y="6" width="3" height="11" fill="currentColor"/></symbol>
+  <symbol id="i-flow" viewBox="0 0 24 24"><rect x="2" y="9" width="5" height="6" rx="1.2" fill="none" stroke="currentColor" stroke-width="1.8"/><rect x="9.5" y="9" width="5" height="6" rx="1.2" fill="none" stroke="currentColor" stroke-width="1.8"/><rect x="17" y="9" width="5" height="6" rx="1.2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M7 12h2.5M14.5 12H17" fill="none" stroke="currentColor" stroke-width="1.8"/></symbol>
+  <symbol id="i-file" viewBox="0 0 24 24"><path d="M6 3h8l4 4v14H6z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M14 3v4h4M9 12h6M9 16h6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+  <symbol id="i-chev" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 2.5 4 6v6c0 5 3.4 8.4 8 9.5 4.6-1.1 8-4.5 8-9.5V6z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="m8.5 12 2.5 2.5 4.5-5" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-empty" viewBox="0 0 64 64"><rect x="10" y="12" width="44" height="40" rx="6" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M10 24h44M22 32h20M22 40h13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><circle cx="46" cy="44" r="11" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="m54 52 7 7" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></symbol>
+</svg>
+
 <div class="wrap">
 <header>
-  <h1>DIP 3.0 规则基线数据集</h1>
+  <div class="brand">
+    <span class="mark"><svg class="ic" aria-hidden="true"><use href="#i-db"/></svg></span>
+    <h1>DIP 3.0 规则基线数据集</h1>
+  </div>
   <p class="sub">基于国家医保局公开的《按病种分值（DIP）付费 3.0 版分组方案》· 从公开 Excel 一键重建 · 以官方公布口径持续校验</p>
   <p class="disclaim">本项目为独立研究实现，与发布机构无隶属关系，未获任何官方认证。仅使用公开数据，不含真实病案；本页不是分组器，不构成结算或支付意见，结果以医保经办机构最终认定为准。</p>
 </header>
 
 <nav>
-  <button class="on" data-p="q">规则库查询</button>
-  <button data-p="v">校验结果</button>
-  <button data-p="d">数据字典</button>
+  <button class="on" data-p="q"><svg class="ic" aria-hidden="true"><use href="#i-search"/></svg>规则库查询</button>
+  <button data-p="v"><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg>校验结果</button>
+  <button data-p="d"><svg class="ic" aria-hidden="true"><use href="#i-book"/></svg>数据字典</button>
 </nav>
 
 <section class="panel on" id="p-q">
   <div class="card">
     <div class="search">
-      <input type="text" id="code" placeholder="输入诊断或手术操作编码，如 A01.0 / C34.1 / 44.1300x001" autocomplete="off">
-      <button class="btn" id="go">查询</button>
+      <label class="inputbox">
+        <svg class="ic" aria-hidden="true"><use href="#i-search"/></svg>
+        <input type="text" id="code" aria-label="诊断或手术操作编码" placeholder="输入诊断或手术操作编码，如 A01.0 / C34.1 / 44.1300x001" autocomplete="off">
+      </label>
+      <button class="btn" id="go"><svg class="ic" aria-hidden="true"><use href="#i-search"/></svg>查询</button>
     </div>
     <div class="chips"><span>示例</span>
       <button class="chip">A01.0</button><button class="chip">A09.0</button>
       <button class="chip">Z51.1</button><button class="chip">C34.1</button>
       <button class="chip">A15.0</button><button class="chip">44.1300x001</button>
     </div>
-    <p class="hint">支持精确编码、区间码（如 C00-C75 覆盖的编码）、以及官方表中用竖线分隔的多编码。命中项显示来源工作表与行号。</p>
+    <p class="hint">支持精确编码、区间码（如 C00-C75 覆盖的编码）、以及官方表中用竖线分隔的多编码。命中项显示来源工作表与 Excel 原始行号。</p>
+    <div class="idxstate" id="idxstate"><span class="dot"></span><span id="idxtxt">正在载入编码索引…</span></div>
   </div>
-  <div id="qresult"></div>
+  <div id="qresult" aria-live="polite"></div>
+  <div class="card">
+    <h2><svg class="ic lg" aria-hidden="true" style="color:var(--accent)"><use href="#i-flow"/></svg>入组判定优先级</h2>
+    <p class="hint" style="margin-top:0">官方表的「分类」列同时是匹配调度顺序，不是普通标签。四类核心病种合计 5125 个。</p>
+    <div class="flow">
+      <div class="fnode" style="--i:0"><span class="fc">XQ</span><span class="fn">先期分组</span><small>最先判定 · 19 条</small></div>
+      <span class="farrow" aria-hidden="true">→</span>
+      <div class="fnode" style="--i:1"><span class="fc">FZ</span><span class="fn">诊断辅助细分</span><small>烧伤 / 肿瘤 / 结核 · 113 条</small></div>
+      <span class="farrow" aria-hidden="true">→</span>
+      <div class="fnode" style="--i:2"><span class="fc">BX</span><span class="fn">并项规则</span><small>手术操作多编码 · 1725 条</small></div>
+      <span class="farrow" aria-hidden="true">→</span>
+      <div class="fnode" style="--i:3"><span class="fc">JC</span><span class="fn">基础规则</span><small>多数为纯诊断入组 · 3268 条</small></div>
+    </div>
+  </div>
 </section>
 
 <section class="panel" id="p-v">
-  <div id="vresult" class="loading">正在加载校验结果…</div>
+  <div id="vresult" class="card loading">正在加载校验结果…</div>
 </section>
 
 <section class="panel" id="p-d">
-  <div id="dresult" class="loading">正在加载数据字典…</div>
+  <div id="dresult" class="card loading">正在加载数据字典…</div>
 </section>
 
-<footer>数据由 pipeline/extract.py 从公开 xlsx 生成，校验由 pipeline/validate.py 执行，页面数据由 pipeline/export_web.py 导出。换版本只换源文件，不改代码。<br>原创代码采用 BSD 3-Clause 许可证；官方数据及其派生结果的权利归发布方，见仓库 DATA_NOTICE.md。</footer>
+<footer>
+  数据由 <code>pipeline/extract.py</code> 从公开 xlsx 生成，校验由 <code>pipeline/validate.py</code> 执行，页面数据由 <code>pipeline/export_web.py</code> 导出。换版本只换源文件，不改代码。<br>
+  原创代码采用 BSD 3-Clause 许可证；官方数据及其派生结果的权利归发布方，见仓库 <code>DATA_NOTICE.md</code>。
+</footer>
 </div>
 
 <script>
 const D='data/';
+let CACHE_NAME='dip3-web-v1';
 const cache={};
-let validation=null, dictionary=null, index=null;
+let validation=null, dictionary=null, index=null, indexPromise=null;
+
+const ICON=(id,cls='ic')=>'<svg class="'+cls+'" aria-hidden="true"><use href="#'+id+'"/></svg>';
+
+function persistable(name){ return name==='code_index.json' || name.indexOf('sheets/')===0; }
 
 async function load(name){
   if(cache[name]) return cache[name];
+  if(indexPromise && name==='code_index.json') return indexPromise;
+  const useCache=persistable(name) && ('caches' in window);
+  if(useCache){
+    try{
+      const store=await caches.open(CACHE_NAME);
+      const hit=await store.match(D+name);
+      if(hit){ cache[name]=await hit.json(); return cache[name]; }
+    }catch(e){}
+  }
   const r=await fetch(D+name);
   if(!r.ok) throw new Error('无法加载 '+name+'（HTTP '+r.status+'）');
-  cache[name]=await r.json();
-  return cache[name];
+  if(useCache){
+    try{ const store=await caches.open(CACHE_NAME); await store.put(D+name,r.clone()); }catch(e){}
+  }
+  const v=await r.json();
+  cache[name]=v;
+  return v;
 }
 async function sheet(t){ return load('sheets/'+t+'.json'); }
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 function head(c){const m=/^([A-Z])(\d{2})/.exec(String(c).toUpperCase().trim());return m?{l:m[1],n:parseInt(m[2],10)}:null;}
+function num(v){return Number(v||0).toLocaleString('en-US');}
 const KINDS={main_dx:'主要诊断',main_op:'主要手术操作',related_op:'相关手术操作',
   mixed_op:'手术操作',other_dx:'其他诊断',excl:'排除表',lookup:'附表'};
 
@@ -133,47 +288,90 @@ document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
   document.getElementById('p-'+b.dataset.p).classList.add('on');
 });
 
+function setIndexState(ok,msg){
+  const el=document.getElementById('idxstate');
+  el.classList.toggle('ready',!!ok);
+  document.getElementById('idxtxt').textContent=msg;
+}
+function ensureIndex(){
+  if(index) return Promise.resolve(index);
+  if(!indexPromise){
+    indexPromise=load('code_index.json').then(v=>{
+      index=v;
+      setIndexState(true,'编码索引已就绪 · '+num(v.stats.exact_keys)+' 个精确编码 / '+num(v.stats.ranges)+' 条区间码');
+      return v;
+    }).catch(e=>{ setIndexState(false,'编码索引加载失败：'+e.message); throw e; });
+  }
+  return indexPromise;
+}
+
 async function boot(){
   try{
-    [validation,dictionary,index]=await Promise.all([load('validation.json'),load('dictionary.json'),load('code_index.json')]);
+    [validation,dictionary]=await Promise.all([load('validation.json'),load('dictionary.json')]);
+    const sha=(validation.meta||{}).source_sha256;
+    if(sha) CACHE_NAME='dip3-web-'+sha.slice(0,12);
     renderValidation(); renderDictionary();
-  }catch(e){ document.getElementById('vresult').innerHTML='<div class="err">'+esc(e.message)+'</div>';
-    document.getElementById('dresult').innerHTML='<div class="err">'+esc(e.message)+'</div>'; }
+    ensureIndex().catch(()=>{});
+  }catch(e){
+    const msg='<div class="err">'+esc(e.message)+'</div>';
+    document.getElementById('vresult').innerHTML=msg;
+    document.getElementById('dresult').innerHTML=msg;
+  }
+}
+
+function skeleton(){
+  return '<div class="skel" aria-busy="true">'+
+    '<div class="srow"><span class="skdot"></span><span class="skbar w1"></span></div>'+
+    '<div class="srow"><span class="skbar w4"></span></div>'+
+    '<div class="srow"><span class="skbar w2"></span></div>'+
+    '<div class="srow"><span class="skbar w3"></span></div>'+
+    '</div>';
 }
 
 function renderValidation(){
   const m=validation.meta||{}, bd=validation.breakdown||{}, labels=validation.category_labels||{};
   let h='<div class="stats">';
-  h+='<div class="stat"><div class="n">'+esc(m.row_total||'-')+'</div><div class="l">有效数据行</div></div>';
-  h+='<div class="stat"><div class="n">'+esc(m.sheet_parsed||'-')+' / '+esc(m.sheet_total||'-')+'</div><div class="l">工作表解析</div></div>';
-  h+='<div class="stat"><div class="n">'+esc(validation.core_total||'-')+'</div><div class="l">核心病种</div></div>';
-  h+='<div class="stat"><div class="n">'+esc(validation.primary_total||'-')+'</div><div class="l">基层病种</div></div>';
+  h+='<div class="stat"><div class="top">'+ICON('i-db')+'有效数据行</div><div class="n">'+num(m.row_total)+'</div></div>';
+  h+='<div class="stat"><div class="top">'+ICON('i-file')+'工作表解析</div><div class="n">'+esc(m.sheet_parsed)+' / '+esc(m.sheet_total)+'</div></div>';
+  h+='<div class="stat"><div class="top">'+ICON('i-chart')+'核心病种</div><div class="n">'+num(validation.core_total)+'</div></div>';
+  h+='<div class="stat"><div class="top">'+ICON('i-shield')+'基层病种</div><div class="n">'+num(validation.primary_total)+'</div></div>';
   h+='</div>';
-  h+='<div class="card"><table><thead><tr><th>断言</th><th>实测</th><th>期望</th><th>结果</th></tr></thead><tbody>';
+  h+='<div class="card"><h2>'+ICON('i-check','ic lg')+'黄金断言</h2>'+
+     '<p class="hint" style="margin-top:0">断言结果由 <code>validate.collect_checks()</code> 真实运行生成，不是手写常量。</p>'+
+     '<table><thead><tr><th>断言</th><th>实测</th><th>期望</th><th>结果</th></tr></thead><tbody>';
   (validation.checks||[]).forEach(c=>{
     let actual=String(c.actual);
     if(c.label.indexOf('SHA256')>=0) actual=actual.slice(0,16)+'…';
     h+='<tr><td>'+esc(c.label)+'</td><td class="mono">'+esc(actual)+'</td><td class="mono">'+esc(c.expected)+
-       '</td><td><span class="badge '+(c.passed?'ok':'no')+'">'+(c.passed?'PASS':'FAIL')+'</span></td></tr>';
+       '</td><td><span class="badge '+(c.passed?'ok':'no')+'">'+(c.passed?ICON('i-check'):'')+(c.passed?'PASS':'FAIL')+'</span></td></tr>';
   });
   h+='</tbody></table></div>';
-  h+='<div class="card"><b>分类分布</b><table style="margin-top:10px"><thead><tr><th>分类码</th><th>含义</th><th>条数</th></tr></thead><tbody>';
-  Object.keys(bd).sort().forEach(k=>{h+='<tr><td class="mono">'+esc(k)+'</td><td>'+esc(labels[k]||'—')+'</td><td class="mono">'+esc(bd[k])+'</td></tr>';});
-  h+='</tbody></table><p class="hint">分类码同时是入组判定优先级：XQ 先期 → FZ 诊断辅助细分 → BX 并项 → JC 基础。</p></div>';
-  h+='<div class="card"><b>数据源</b><table style="margin-top:10px"><tbody>';
+  const order=['XQ','FZ','BX','JC'];
+  const max=Math.max(1,...order.map(k=>Number(bd[k]||0)));
+  h+='<div class="card"><h2>'+ICON('i-chart','ic lg')+'分类分布</h2>'+
+     '<p class="hint" style="margin-top:0">分类码同时是入组判定优先级：XQ 先期 → FZ 诊断辅助细分 → BX 并项 → JC 基础。</p><div class="bars">';
+  order.forEach((k,i)=>{
+    const v=Number(bd[k]||0), pct=Math.max(2,Math.round(v/max*100));
+    h+='<div class="barrow"><span class="bl"><b>'+esc(k)+'</b>'+esc(labels[k]||'—')+'</span>'+
+       '<span class="btrack"><span class="bfill" style="width:'+pct+'%;--i:'+i+'"></span></span>'+
+       '<span class="bv">'+num(v)+'</span></div>';
+  });
+  h+='</div></div>';
+  h+='<div class="card"><h2>'+ICON('i-file','ic lg')+'数据源</h2><table style="margin-top:12px"><tbody>';
   [['源文件',m.source_file],['SHA256',m.source_sha256],['字节',m.source_bytes],
-   ['构建时间(UTC)',m.built_at],['openpyxl',m.openpyxl_version],
-   ['编码索引',index.stats.exact_keys+' 个精确编码 / '+index.stats.ranges+' 条区间码']
-  ].forEach(([k,v])=>{h+='<tr><th style="width:170px">'+esc(k)+'</th><td class="mono">'+esc(v)+'</td></tr>';});
+   ['构建时间(UTC)',m.built_at],['openpyxl',m.openpyxl_version]
+  ].forEach(([k,v])=>{h+='<tr><th style="width:190px">'+esc(k)+'</th><td class="mono">'+esc(v)+'</td></tr>';});
   h+='</tbody></table></div>';
   document.getElementById('vresult').innerHTML=h;
 }
 
 function renderDictionary(){
-  let h='<div class="card"><b>官方 DIP 3.0 工作簿结构</b><p class="hint">共 '+dictionary.sheets.length+' 张工作表。点击展开查看字段与前 20 行数据。</p></div>';
+  let h='<div class="card"><h2>'+ICON('i-book','ic lg')+'官方 DIP 3.0 工作簿结构</h2>'+
+    '<p class="hint" style="margin-top:0">共 '+dictionary.sheets.length+' 张工作表。点击展开查看字段与前 20 行数据。</p></div>';
   dictionary.sheets.forEach(s=>{
-    h+='<details data-t="'+esc(s.table)+'"><summary><span>'+esc(s.sheet)+'</span>'+
-       '<span class="cnt">'+esc(s.table)+' · '+s.row_count+' 行 · '+s.col_count+' 列</span></summary>'+
+    h+='<details data-t="'+esc(s.table)+'"><summary><span class="left">'+ICON('i-file')+
+       '<span>'+esc(s.sheet)+'</span></span><span class="cnt">'+esc(s.table)+' · '+s.row_count+' 行 · '+s.col_count+' 列 '+
+       ICON('i-chev','ic chev')+'</span></summary>'+
        '<div class="inner" id="i-'+esc(s.table)+'"><div class="loading">展开后加载…</div></div></details>';
   });
   document.getElementById('dresult').innerHTML=h;
@@ -200,11 +398,11 @@ function renderDictionary(){
 async function query(){
   const el=document.getElementById('qresult');
   const raw=document.getElementById('code').value.trim();
-  if(!raw){el.innerHTML='<div class="card hint">请输入编码。</div>';return;}
+  if(!raw){el.innerHTML='<div class="card hint" style="margin:0">请输入编码。</div>';return;}
   const code=raw.toUpperCase();
-  el.innerHTML='<div class="card loading">查询中…</div>';
+  el.innerHTML=skeleton();
   try{
-    if(!index) index=await load('code_index.json');
+    await ensureIndex();
     if(!dictionary) dictionary=await load('dictionary.json');
     const refs=[];
     (index.exact[code]||[]).forEach(r=>refs.push({ref:r,via:'精确匹配'}));
@@ -214,17 +412,22 @@ async function query(){
         refs.push({ref:rg.ref,via:'区间码 '+rg.raw});
     });
     if(!refs.length){
-      el.innerHTML='<div class="card"><b>未命中</b><p class="hint">编码 '+esc(raw)+' 未出现在规则库的编码列中。可尝试示例编码，或到「数据字典」查看原始表。</p></div>';
+      el.innerHTML='<div class="card empty">'+ICON('i-empty','ic xl')+'<b>未命中</b>'+
+        '<p class="hint">编码 '+esc(raw)+' 未出现在规则库的编码列中。可尝试示例编码，或到「数据字典」查看原始表。</p></div>';
       return;
     }
     const nameOf={}; (dictionary.sheets||[]).forEach(s=>nameOf[s.table]=s.sheet);
     const byTable={};
     refs.forEach(x=>{ (byTable[x.ref[0]]=byTable[x.ref[0]]||[]).push(x); });
-    let h='<div class="card"><b>命中 '+refs.length+' 条规则引用</b>'+
-      '<p class="hint">查询编码：'+esc(raw)+'。每条显示来源工作表与 Excel 原始行号。</p></div>';
-    for(const t of Object.keys(byTable).sort()){
-      const s=await sheet(t);
-      h+='<div class="card"><b>'+esc(nameOf[t]||t)+'</b> <span class="cnt">'+esc(t)+' · '+byTable[t].length+' 条</span>';
+    const tables=Object.keys(byTable).sort();
+    const loaded=await Promise.all(tables.map(t=>sheet(t)));
+    const sheets={}; tables.forEach((t,i)=>sheets[t]=loaded[i]);
+    let h='<div class="card"><h2>'+ICON('i-search','ic lg')+'命中 '+num(refs.length)+' 条规则引用</h2>'+
+      '<p class="hint" style="margin-top:0">查询编码：'+esc(raw)+'。每条显示来源工作表与 Excel 原始行号。</p></div>';
+    for(const t of tables){
+      const s=sheets[t];
+      h+='<div class="card"><h2>'+ICON('i-file','ic lg')+esc(nameOf[t]||t)+'</h2>'+
+         '<p class="hint" style="margin-top:0">'+esc(t)+' · '+byTable[t].length+' 条</p>';
       byTable[t].slice(0,60).forEach(x=>{
         const r=s.rows[x.ref[1]]; if(!r) return;
         const kind=x.ref[2]||'';
