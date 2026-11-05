@@ -252,11 +252,16 @@ let validation=null, dictionary=null, index=null, indexPromise=null;
 
 const ICON=(id,cls='ic')=>'<svg class="'+cls+'" aria-hidden="true"><use href="#'+id+'"/></svg>';
 
-function persistable(name){ return name==='code_index.json' || name.indexOf('sheets/')===0; }
+function persistable(name){
+  return name==='code_index.json' || name.indexOf('sheets/')===0 || name.indexOf('shards/')===0;
+}
+function shardKey(code){
+  const c=(code[0]||'_').toUpperCase();
+  return /^[A-Z0-9]$/.test(c)?c:'_';
+}
 
 async function load(name){
   if(cache[name]) return cache[name];
-  if(indexPromise && name==='code_index.json') return indexPromise;
   const useCache=persistable(name) && ('caches' in window);
   if(useCache){
     try{
@@ -298,9 +303,10 @@ function ensureIndex(){
   if(!indexPromise){
     indexPromise=load('code_index.json').then(v=>{
       index=v;
-      setIndexState(true,'编码索引已就绪 · '+num(v.stats.exact_keys)+' 个精确编码 / '+num(v.stats.ranges)+' 条区间码');
+      setIndexState(true,'索引清单已就绪 · '+num(v.stats.exact_keys)+' 个精确编码 / '+
+        v.shards.length+' 个分片 / '+num(v.stats.ranges)+' 条区间码（查询时按需加载单个分片）');
       return v;
-    }).catch(e=>{ setIndexState(false,'编码索引加载失败：'+e.message); throw e; });
+    }).catch(e=>{ setIndexState(false,'索引清单加载失败：'+e.message); throw e; });
   }
   return indexPromise;
 }
@@ -402,41 +408,48 @@ async function query(){
   const code=raw.toUpperCase();
   el.innerHTML=skeleton();
   try{
-    await ensureIndex();
-    if(!dictionary) dictionary=await load('dictionary.json');
+    const manifest=await ensureIndex();
+    const key=shardKey(code);
+    const shard=(manifest.shards||[]).indexOf(key)>=0
+      ? await load('shards/'+key+'.json') : {exact:{},rows:{}};
     const refs=[];
-    (index.exact[code]||[]).forEach(r=>refs.push({ref:r,via:'精确匹配'}));
-    (index.ranges||[]).forEach(rg=>{
+    (shard.exact[code]||[]).forEach(r=>refs.push({ref:r,via:'精确匹配'}));
+    (manifest.ranges||[]).forEach(rg=>{
       const h0=head(code),s=head(rg.start),e=head(rg.end);
       if(h0&&s&&e&&s.l===e.l&&h0.l===s.l&&h0.n>=s.n&&h0.n<=e.n)
-        refs.push({ref:rg.ref,via:'区间码 '+rg.raw});
+        refs.push({ref:rg.ref,via:'区间码 '+rg.raw,alt:shardKey(rg.start)});
     });
     if(!refs.length){
       el.innerHTML='<div class="card empty">'+ICON('i-empty','ic xl')+'<b>未命中</b>'+
         '<p class="hint">编码 '+esc(raw)+' 未出现在规则库的编码列中。可尝试示例编码，或到「数据字典」查看原始表。</p></div>';
       return;
     }
-    const nameOf={}; (dictionary.sheets||[]).forEach(s=>nameOf[s.table]=s.sheet);
+    // 分片自带行内容；仅当区间码的起始分片不同时才补一次请求
+    const rows={...(shard.rows||{})};
+    const extra=[...new Set(refs.filter(x=>x.alt&&x.alt!==key&&
+      !(x.ref[0]+':'+x.ref[1] in rows)).map(x=>x.alt))];
+    if(extra.length){
+      const loaded=await Promise.all(extra.map(k=>load('shards/'+k+'.json')));
+      loaded.forEach(s=>Object.assign(rows,s.rows||{}));
+    }
+    const nameOf=manifest.sheet_names||{}, cols=manifest.columns||{};
     const byTable={};
     refs.forEach(x=>{ (byTable[x.ref[0]]=byTable[x.ref[0]]||[]).push(x); });
     const tables=Object.keys(byTable).sort();
-    const loaded=await Promise.all(tables.map(t=>sheet(t)));
-    const sheets={}; tables.forEach((t,i)=>sheets[t]=loaded[i]);
     let h='<div class="card"><h2>'+ICON('i-search','ic lg')+'命中 '+num(refs.length)+' 条规则引用</h2>'+
-      '<p class="hint" style="margin-top:0">查询编码：'+esc(raw)+'。每条显示来源工作表与 Excel 原始行号。</p></div>';
+      '<p class="hint" style="margin-top:0">查询编码：'+esc(raw)+'。行内容随索引分片一次载入，无需请求原始表。</p></div>';
     for(const t of tables){
-      const s=sheets[t];
+      const names=cols[t]||[];
       h+='<div class="card"><h2>'+ICON('i-file','ic lg')+esc(nameOf[t]||t)+'</h2>'+
          '<p class="hint" style="margin-top:0">'+esc(t)+' · '+byTable[t].length+' 条</p>';
       byTable[t].slice(0,60).forEach(x=>{
-        const r=s.rows[x.ref[1]]; if(!r) return;
+        const packed=rows[t+':'+x.ref[1]]; if(!packed) return;
         const kind=x.ref[2]||'';
-        h+='<div class="rowitem"><div class="rowmeta">来源行 '+esc(r.src)+' · '+
+        h+='<div class="rowitem"><div class="rowmeta">来源行 '+esc(packed[0])+' · '+
            '<span class="tag'+(kind==='excl'?' excl':'')+'">'+esc(KINDS[kind]||kind)+'</span>'+
            '<span class="tag">'+esc(x.via)+'</span></div><div class="kv">';
-        s.columns.forEach((c,j)=>{
-          const v=(r.v[j]||'').trim();
-          if(v) h+='<div><b>'+esc(c)+'</b>'+esc(v)+'</div>';
+        (packed[1]||[]).forEach(([j,v])=>{
+          h+='<div><b>'+esc(names[j]||('列'+(j+1)))+'</b>'+esc(v)+'</div>';
         });
         h+='</div></div>';
       });
