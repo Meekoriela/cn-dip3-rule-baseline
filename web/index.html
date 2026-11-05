@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DIP 3.0 规则基线数据集 · 源自国家医保局公开文件</title>
+<style>
+  :root{
+    --bg:#f7f8fa; --card:#ffffff; --line:#e3e6ea; --line2:#eef0f3;
+    --tx:#1f2328; --tx2:#5b6570; --tx3:#8a939d;
+    --ok:#1d7a55; --okbg:#e8f5ef; --warn:#a8620d; --warnbg:#fdf3e3;
+    --accent:#1f5fa8; --accentbg:#eaf1fb;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--tx);
+    font:14px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
+  .wrap{max-width:1080px;margin:0 auto;padding:28px 20px 60px}
+  header{border-bottom:1px solid var(--line);padding-bottom:18px;margin-bottom:22px}
+  h1{font-size:20px;font-weight:600;margin:0 0 6px}
+  .sub{color:var(--tx2);font-size:13px;margin:0}
+  .disclaim{color:var(--tx3);font-size:12px;margin-top:10px}
+  nav{display:flex;gap:6px;margin-bottom:20px;border-bottom:1px solid var(--line)}
+  nav button{background:none;border:none;border-bottom:2px solid transparent;padding:9px 16px;
+    font:inherit;color:var(--tx2);cursor:pointer}
+  nav button.on{color:var(--accent);border-bottom-color:var(--accent);font-weight:600}
+  .panel{display:none}.panel.on{display:block}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px;margin-bottom:16px}
+  .search{display:flex;gap:10px;flex-wrap:wrap}
+  input[type=text]{flex:1;min-width:260px;padding:10px 12px;border:1px solid var(--line);
+    border-radius:8px;font:inherit;background:#fff;color:var(--tx)}
+  input[type=text]:focus{outline:none;border-color:var(--accent)}
+  .btn{padding:10px 20px;border:1px solid var(--accent);background:var(--accent);color:#fff;
+    border-radius:8px;font:inherit;cursor:pointer}
+  .chips{margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .chips span{color:var(--tx3);font-size:12px;margin-right:2px}
+  .chip{border:1px solid var(--line);background:#fff;color:var(--tx2);border-radius:20px;
+    padding:4px 12px;font-size:12px;cursor:pointer;font-family:ui-monospace,Consolas,monospace}
+  .chip:hover{border-color:var(--accent);color:var(--accent)}
+  .hint{color:var(--tx3);font-size:12px;margin-top:10px}
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:16px}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+  .stat .n{font-size:22px;font-weight:600;font-variant-numeric:tabular-nums}
+  .stat .l{font-size:12px;color:var(--tx2);margin-top:2px}
+  .pass{color:var(--ok)}.fail{color:#b42318}
+  .badge{display:inline-block;padding:2px 9px;border-radius:5px;font-size:12px;font-weight:600}
+  .badge.ok{background:var(--okbg);color:var(--ok)}
+  .badge.no{background:#fdeaea;color:#b42318}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line2);vertical-align:top}
+  th{color:var(--tx2);font-weight:600;background:#fafbfc}
+  tr:last-child td{border-bottom:none}
+  .mono{font-family:ui-monospace,Consolas,monospace;font-size:12px}
+  .tag{display:inline-block;background:var(--accentbg);color:var(--accent);border-radius:4px;
+    padding:1px 7px;font-size:11px;margin-right:5px}
+  .tag.excl{background:var(--warnbg);color:var(--warn)}
+  .rowitem{border:1px solid var(--line);border-radius:8px;padding:12px 14px;margin-bottom:10px;background:#fff}
+  .rowmeta{color:var(--tx3);font-size:12px;margin-bottom:6px}
+  .kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:4px 18px;font-size:13px}
+  .kv div{overflow-wrap:anywhere}
+  .kv b{color:var(--tx2);font-weight:500;margin-right:6px}
+  details{background:var(--card);border:1px solid var(--line);border-radius:10px;margin-bottom:10px;padding:0 16px}
+  summary{cursor:pointer;padding:14px 0;font-weight:600;display:flex;justify-content:space-between;gap:12px}
+  summary .cnt{color:var(--tx3);font-weight:400;font-size:12px}
+  details .inner{border-top:1px solid var(--line2);padding:12px 0 16px;overflow-x:auto}
+  .loading{color:var(--tx3);padding:20px 0}
+  .err{color:#b42318;background:#fdeaea;border:1px solid #f5c6c6;border-radius:8px;padding:12px}
+  footer{color:var(--tx3);font-size:12px;margin-top:32px;border-top:1px solid var(--line);padding-top:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>DIP 3.0 规则基线数据集</h1>
+  <p class="sub">基于国家医保局公开的《按病种分值（DIP）付费 3.0 版分组方案》· 从公开 Excel 一键重建 · 以官方公布口径持续校验</p>
+  <p class="disclaim">本项目为独立研究实现，与发布机构无隶属关系，未获任何官方认证。仅使用公开数据，不含真实病案；本页不是分组器，不构成结算或支付意见，结果以医保经办机构最终认定为准。</p>
+</header>
+
+<nav>
+  <button class="on" data-p="q">规则库查询</button>
+  <button data-p="v">校验结果</button>
+  <button data-p="d">数据字典</button>
+</nav>
+
+<section class="panel on" id="p-q">
+  <div class="card">
+    <div class="search">
+      <input type="text" id="code" placeholder="输入诊断或手术操作编码，如 A01.0 / C34.1 / 44.1300x001" autocomplete="off">
+      <button class="btn" id="go">查询</button>
+    </div>
+    <div class="chips"><span>示例</span>
+      <button class="chip">A01.0</button><button class="chip">A09.0</button>
+      <button class="chip">Z51.1</button><button class="chip">C34.1</button>
+      <button class="chip">A15.0</button><button class="chip">44.1300x001</button>
+    </div>
+    <p class="hint">支持精确编码、区间码（如 C00-C75 覆盖的编码）、以及官方表中用竖线分隔的多编码。命中项显示来源工作表与行号。</p>
+  </div>
+  <div id="qresult"></div>
+</section>
+
+<section class="panel" id="p-v">
+  <div id="vresult" class="loading">正在加载校验结果…</div>
+</section>
+
+<section class="panel" id="p-d">
+  <div id="dresult" class="loading">正在加载数据字典…</div>
+</section>
+
+<footer>数据由 pipeline/extract.py 从官方 xlsx 生成，校验由 pipeline/validate.py 执行，页面数据由 pipeline/export_web.py 导出。换版本只换源文件，不改代码。</footer>
+</div>
+
+<script>
+const D='data/';
+const cache={};
+let validation=null, dictionary=null, index=null;
+
+async function load(name){
+  if(cache[name]) return cache[name];
+  const r=await fetch(D+name);
+  if(!r.ok) throw new Error('无法加载 '+name+'（HTTP '+r.status+'）');
+  cache[name]=await r.json();
+  return cache[name];
+}
+async function sheet(t){ return load('sheets/'+t+'.json'); }
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function head(c){const m=/^([A-Z])(\d{2})/.exec(String(c).toUpperCase().trim());return m?{l:m[1],n:parseInt(m[2],10)}:null;}
+const KINDS={main_dx:'主要诊断',main_op:'主要手术操作',related_op:'相关手术操作',
+  mixed_op:'手术操作',other_dx:'其他诊断',excl:'排除表',lookup:'附表'};
+
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('nav button').forEach(x=>x.classList.remove('on'));
+  document.querySelectorAll('.panel').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on');
+  document.getElementById('p-'+b.dataset.p).classList.add('on');
+});
+
+async function boot(){
+  try{
+    [validation,dictionary,index]=await Promise.all([load('validation.json'),load('dictionary.json'),load('code_index.json')]);
+    renderValidation(); renderDictionary();
+  }catch(e){ document.getElementById('vresult').innerHTML='<div class="err">'+esc(e.message)+'</div>';
+    document.getElementById('dresult').innerHTML='<div class="err">'+esc(e.message)+'</div>'; }
+}
+
+function renderValidation(){
+  const m=validation.meta||{}, bd=validation.breakdown||{}, labels=validation.category_labels||{};
+  let h='<div class="stats">';
+  h+='<div class="stat"><div class="n">'+esc(m.row_total||'-')+'</div><div class="l">有效数据行</div></div>';
+  h+='<div class="stat"><div class="n">'+esc(m.sheet_parsed||'-')+' / '+esc(m.sheet_total||'-')+'</div><div class="l">工作表解析</div></div>';
+  h+='<div class="stat"><div class="n">'+esc(validation.core_total||'-')+'</div><div class="l">核心病种</div></div>';
+  h+='<div class="stat"><div class="n">'+esc(validation.primary_total||'-')+'</div><div class="l">基层病种</div></div>';
+  h+='</div>';
+  h+='<div class="card"><table><thead><tr><th>断言</th><th>实测</th><th>期望</th><th>结果</th></tr></thead><tbody>';
+  (validation.checks||[]).forEach(c=>{
+    let actual=String(c.actual);
+    if(c.label.indexOf('SHA256')>=0) actual=actual.slice(0,16)+'…';
+    h+='<tr><td>'+esc(c.label)+'</td><td class="mono">'+esc(actual)+'</td><td class="mono">'+esc(c.expected)+
+       '</td><td><span class="badge '+(c.passed?'ok':'no')+'">'+(c.passed?'PASS':'FAIL')+'</span></td></tr>';
+  });
+  h+='</tbody></table></div>';
+  h+='<div class="card"><b>分类分布</b><table style="margin-top:10px"><thead><tr><th>分类码</th><th>含义</th><th>条数</th></tr></thead><tbody>';
+  Object.keys(bd).sort().forEach(k=>{h+='<tr><td class="mono">'+esc(k)+'</td><td>'+esc(labels[k]||'—')+'</td><td class="mono">'+esc(bd[k])+'</td></tr>';});
+  h+='</tbody></table><p class="hint">分类码同时是入组判定优先级：XQ 先期 → FZ 诊断辅助细分 → BX 并项 → JC 基础。</p></div>';
+  h+='<div class="card"><b>数据源</b><table style="margin-top:10px"><tbody>';
+  [['源文件',m.source_file],['SHA256',m.source_sha256],['字节',m.source_bytes],
+   ['构建时间(UTC)',m.built_at],['openpyxl',m.openpyxl_version],
+   ['编码索引',index.stats.exact_keys+' 个精确编码 / '+index.stats.ranges+' 条区间码']
+  ].forEach(([k,v])=>{h+='<tr><th style="width:170px">'+esc(k)+'</th><td class="mono">'+esc(v)+'</td></tr>';});
+  h+='</tbody></table></div>';
+  document.getElementById('vresult').innerHTML=h;
+}
+
+function renderDictionary(){
+  let h='<div class="card"><b>官方 DIP 3.0 工作簿结构</b><p class="hint">共 '+dictionary.sheets.length+' 张工作表。点击展开查看字段与前 20 行数据。</p></div>';
+  dictionary.sheets.forEach(s=>{
+    h+='<details data-t="'+esc(s.table)+'"><summary><span>'+esc(s.sheet)+'</span>'+
+       '<span class="cnt">'+esc(s.table)+' · '+s.row_count+' 行 · '+s.col_count+' 列</span></summary>'+
+       '<div class="inner" id="i-'+esc(s.table)+'"><div class="loading">展开后加载…</div></div></details>';
+  });
+  document.getElementById('dresult').innerHTML=h;
+  document.querySelectorAll('#dresult details').forEach(d=>d.addEventListener('toggle',async()=>{
+    if(!d.open||d.dataset.done) return;
+    d.dataset.done='1';
+    const el=document.getElementById('i-'+d.dataset.t);
+    try{
+      const s=await sheet(d.dataset.t);
+      let t='<table><thead><tr><th>#</th><th>源行</th>';
+      s.columns.forEach(c=>t+='<th>'+esc(c)+'</th>');
+      t+='</tr></thead><tbody>';
+      s.rows.slice(0,20).forEach((r,i)=>{
+        t+='<tr><td class="mono">'+(i+1)+'</td><td class="mono">'+esc(r.src)+'</td>';
+        s.columns.forEach((_,j)=>t+='<td>'+esc(r.v[j]||'')+'</td>');
+        t+='</tr>';
+      });
+      t+='</tbody></table><p class="hint">仅显示前 20 行，共 '+s.rows.length+' 行。</p>';
+      el.innerHTML=t;
+    }catch(e){el.innerHTML='<div class="err">'+esc(e.message)+'</div>';}
+  }));
+}
+
+async function query(){
+  const el=document.getElementById('qresult');
+  const raw=document.getElementById('code').value.trim();
+  if(!raw){el.innerHTML='<div class="card hint">请输入编码。</div>';return;}
+  const code=raw.toUpperCase();
+  el.innerHTML='<div class="card loading">查询中…</div>';
+  try{
+    if(!index) index=await load('code_index.json');
+    if(!dictionary) dictionary=await load('dictionary.json');
+    const refs=[];
+    (index.exact[code]||[]).forEach(r=>refs.push({ref:r,via:'精确匹配'}));
+    (index.ranges||[]).forEach(rg=>{
+      const h0=head(code),s=head(rg.start),e=head(rg.end);
+      if(h0&&s&&e&&s.l===e.l&&h0.l===s.l&&h0.n>=s.n&&h0.n<=e.n)
+        refs.push({ref:rg.ref,via:'区间码 '+rg.raw});
+    });
+    if(!refs.length){
+      el.innerHTML='<div class="card"><b>未命中</b><p class="hint">编码 '+esc(raw)+' 未出现在规则库的编码列中。可尝试示例编码，或到「数据字典」查看原始表。</p></div>';
+      return;
+    }
+    const nameOf={}; (dictionary.sheets||[]).forEach(s=>nameOf[s.table]=s.sheet);
+    const byTable={};
+    refs.forEach(x=>{ (byTable[x.ref[0]]=byTable[x.ref[0]]||[]).push(x); });
+    let h='<div class="card"><b>命中 '+refs.length+' 条规则引用</b>'+
+      '<p class="hint">查询编码：'+esc(raw)+'。每条显示来源工作表与 Excel 原始行号。</p></div>';
+    for(const t of Object.keys(byTable).sort()){
+      const s=await sheet(t);
+      h+='<div class="card"><b>'+esc(nameOf[t]||t)+'</b> <span class="cnt">'+esc(t)+' · '+byTable[t].length+' 条</span>';
+      byTable[t].slice(0,60).forEach(x=>{
+        const r=s.rows[x.ref[1]]; if(!r) return;
+        const kind=x.ref[2]||'';
+        h+='<div class="rowitem"><div class="rowmeta">来源行 '+esc(r.src)+' · '+
+           '<span class="tag'+(kind==='excl'?' excl':'')+'">'+esc(KINDS[kind]||kind)+'</span>'+
+           '<span class="tag">'+esc(x.via)+'</span></div><div class="kv">';
+        s.columns.forEach((c,j)=>{
+          const v=(r.v[j]||'').trim();
+          if(v) h+='<div><b>'+esc(c)+'</b>'+esc(v)+'</div>';
+        });
+        h+='</div></div>';
+      });
+      if(byTable[t].length>60) h+='<p class="hint">仅显示前 60 条，共 '+byTable[t].length+' 条。</p>';
+      h+='</div>';
+    }
+    el.innerHTML=h;
+  }catch(e){el.innerHTML='<div class="err">'+esc(e.message)+'</div>';}
+}
+
+document.getElementById('go').onclick=query;
+document.getElementById('code').addEventListener('keydown',e=>{if(e.key==='Enter')query();});
+document.querySelectorAll('.chip').forEach(c=>c.onclick=()=>{
+  document.getElementById('code').value=c.textContent; query();
+});
+boot();
+</script>
+</body>
+</html>
