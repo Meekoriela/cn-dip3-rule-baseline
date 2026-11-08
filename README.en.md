@@ -142,7 +142,7 @@ python tests/verify_export.py
 - No blocking items. Optional: version comparison between the full ICD dictionaries and the DIP catalogue (must use the currently effective version from the maintenance platform; rights remain with the publisher)
 - Optional: DRG / DIP dual-scheme comparison (several implementations already exist; low resume value)
 
-Completed: source workbook shipped for one-command rebuild; 23 assertions, shard checks and round-trip tests re-run in CI; SQLite / JSON / Parquet formats; `v0.1.0` release; live static demo at https://meekoriela.github.io/cn-dip3-rule-baseline/ .
+Completed: source workbook shipped for one-command rebuild; 23 assertions, shard checks and round-trip tests re-run in CI; SQLite / JSON / Parquet formats; `v0.2.0` release; live static demo at https://meekoriela.github.io/cn-dip3-rule-baseline/ .
 
 ## License and data rights
 

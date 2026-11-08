@@ -148,7 +148,7 @@ python tests/verify_export.py
 - 无阻塞项。后续可选：ICD 全量编码表与 DIP 目录的版本对照（需以动态维护平台当期版本为准，且权利归发布方）
 - 可选：DRG / DIP 双口径对照（已有多个现成实现，简历收益低）
 
-已完成：源 xlsx 随仓库分发，一键复现不依赖外部文件；23 条断言、分片校验、往返一致性由 CI 每次自动复跑；SQLite / JSON / Parquet 三种数据形态；`v0.1.0` release 可引用；静态演示页已上线 https://meekoriela.github.io/cn-dip3-rule-baseline/ 。
+已完成：源 xlsx 随仓库分发，一键复现不依赖外部文件；23 条断言、分片校验、往返一致性由 CI 每次自动复跑；SQLite / JSON / Parquet 三种数据形态；`v0.2.0` release 可引用；静态演示页已上线 https://meekoriela.github.io/cn-dip3-rule-baseline/ 。
 
 ## 许可证与数据权利
 
