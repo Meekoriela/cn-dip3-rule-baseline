@@ -109,7 +109,8 @@ data/parquet/   10 张表的 Parquet（zstd），供 pandas / DuckDB 直接读�
 pipeline/       extract.py、validate.py、export_web.py、export_parquet.py
 schemas/        dataset.json 数据字典（字段、来源工作表、行数）
 docs/           CODING_STANDARDS.md 编码体系与版本口径（中英）
-web/            index.html 静态演示页 + data/（索引分片、表分片、断言结果）
+                PAYMENT_SCOPE.md 支付测算口径与业务边界（中英）
+web/            index.html 规则库查询页、explain.html 面向公众的解读页 + data/（索引分片、表分片、断言结果）
 tests/          verify_export.py（分片自包含 + 查询口径回归）
                 verify_roundtrip.py（往返一致性 + 自回查覆盖率 + 三形态行数对齐）
 ```
@@ -122,6 +123,8 @@ python -m http.server 8000 -d web
 ```
 
 浏览器打开 `http://127.0.0.1:8000/`。三个板块：规则库查询（编码 → 病种与来源行号）、校验结果、数据字典浏览。
+
+同一站点另有**面向公众的解读页** `explain.html`（首页有入口）：用六个反直觉问题和一条滚动流程讲清「一次住院，医保的钱是怎么定下来的」。数字现场取自 `data/validation.json`，不含真实病案，不做支付测算，不构成结算或支付意见。
 
 页面数据全部由构建脚本生成；断言结果来自 `validate.collect_checks()` 真实运行，不是手写常量。
 编码索引按**编码首字符分片**：首屏只加载约 7 KB 的清单（`code_index.json`，含区间码、列名、表名、分片清单），查询时按需加载单个分片；每个分片自带命中行的字段内容，因此查询不再请求原始表。`sheets/*.json` 仅用于「数据字典」展开前 20 行。
@@ -138,6 +141,8 @@ python tests/verify_export.py
 
 **本项目不内嵌、也不锁定某一版 ICD 全量编码表**——这是核查后的结论，不是遗漏。官方 DIP 3.0 附件只含病种目录与编码片段；全量 ICD-10 医保版 / ICD-9-CM-3 医保版由国家医保信息业务编码标准数据库**动态维护**（`code.nhsa.gov.cn`），且 `医保办函〔2025〕141号` 在 2025-12-31 又调整了手术操作代码，因此写死「2.0 版」会给出一个看似确定、实际过期的版本号。完整依据、查询入口与编码结构见 `docs/CODING_STANDARDS.md`。
 
+**本项目也不提供「输入病案 → 输出报销金额」**：官方附件经实测全表无分值 / 点数列，分值属地方参数，点值须年终清算才确定，年内不存在实时点值。完整业务依据、参数化测算的允许形态与五条红线见 `docs/PAYMENT_SCOPE.md`。
+
 ## 尚未完成
 
 - 无阻塞项。后续可选：ICD 全量编码表与 DIP 目录的版本对照（需以动态维护平台当期版本为准，且权利归发布方）
@@ -149,7 +154,7 @@ python tests/verify_export.py
 
 | 范围 | 适用文件 | 依据 |
 |---|---|---|
-| 原创代码 | `pipeline/*.py`、`tests/*.py`、`docs/*.md`、`web/index.html`、README、脚本与配置 | `LICENSE`（BSD 3-Clause） |
+| 原创代码 | `pipeline/*.py`、`tests/*.py`、`docs/*.md`、`web/index.html`、`web/explain.html`、README、脚本与配置 | `LICENSE`（BSD 3-Clause） |
 | 官方数据及其派生 | `data/raw/`、`data/build/`、`data/parquet/`、`web/data/`、`schemas/dataset.json` | `DATA_NOTICE.md`，**不适用** BSD-3-Clause |
 
 BSD-3-Clause 第 3 条禁止以作者或贡献者名义为衍生产品背书。官方数据的权利归发布方，本仓库不主张权利、不提供再授权；使用前请自行核对官方最新版本与地方实施细则。

@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>看懂 DIP 3.0 · 一次住院，医保的钱是怎么定下来的</title>
+<style>
+  :root{
+    --bg:#f7f8fa; --card:#ffffff; --line:#e3e6ea; --line2:#eef0f3;
+    --tx:#1f2328; --tx2:#5b6570; --tx3:#66717d;
+    --ok:#1d7a55; --okbg:#e8f5ef; --warn:#a8620d; --warnbg:#fdf3e3;
+    --accent:#1f5fa8; --accentbg:#eaf1fb;
+    --r:14px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--tx);
+    font:16px/1.7 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
+  .wrap{max-width:1080px;margin:0 auto;padding:36px 24px 80px}
+  .ic{width:18px;height:18px;flex:none;display:inline-block;vertical-align:-3px}
+  .ic.lg{width:24px;height:24px;vertical-align:-5px}
+  a{color:var(--accent)}
+  .topline{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;align-items:center;
+    margin-bottom:24px;font-size:15px}
+  .back{display:inline-flex;align-items:center;gap:7px;text-decoration:none;color:var(--tx2);
+    border:1px solid var(--line);background:#fff;border-radius:9px;padding:9px 15px;
+    transition:transform .2s ease,border-color .2s ease,color .2s ease}
+  .back:hover{transform:translateX(-2px);border-color:var(--accent);color:var(--accent)}
+  .kicker{display:inline-flex;align-items:center;gap:8px;color:var(--warn);
+    background:var(--warnbg);border-radius:20px;padding:6px 14px;font-size:14px}
+  h1{font-size:38px;line-height:1.22;font-weight:600;margin:12px 0 0;letter-spacing:-.5px}
+  .sub{color:var(--tx2);font-size:18px;margin:14px 0 0;max-width:760px}
+  .disclaim{color:var(--tx3);font-size:14px;margin:16px 0 0;line-height:1.7;
+    border-left:3px solid var(--line);padding-left:14px}
+  .jump{display:flex;gap:10px;flex-wrap:wrap;margin:26px 0 40px}
+  .jump a{text-decoration:none;border:1px solid var(--line);background:#fff;border-radius:10px;
+    padding:10px 16px;font-size:15px;color:var(--tx2);
+    transition:transform .2s ease,border-color .2s ease,color .2s ease}
+  .jump a:hover{transform:translateY(-2px);border-color:var(--accent);color:var(--accent)}
+  section{scroll-margin-top:20px}
+  .sechead{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin:0 0 8px}
+  .secno{font-size:15px;font-weight:600;color:var(--warn);letter-spacing:1px}
+  h2{font-size:27px;font-weight:600;margin:0;letter-spacing:-.3px}
+  .sechint{color:var(--tx2);font-size:16px;margin:0 0 24px}
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px}
+  .qa{background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+    padding:0;overflow:hidden;transition:border-color .2s ease,transform .2s ease;
+    animation:rise .4s ease both}
+  .qa:nth-child(2){animation-delay:.05s}.qa:nth-child(3){animation-delay:.1s}
+  .qa:nth-child(4){animation-delay:.15s}.qa:nth-child(5){animation-delay:.2s}
+  .qa:nth-child(6){animation-delay:.25s}
+  .qa:hover{border-color:#d4dae2;transform:translateY(-2px)}
+  .qa[open]{border-color:var(--accent)}
+  .qa summary{cursor:pointer;list-style:none;padding:20px 22px;display:flex;gap:14px;
+    align-items:flex-start;font-size:17px;font-weight:600;line-height:1.5}
+  .qa summary::-webkit-details-marker{display:none}
+  .qa .qno{color:var(--warn);font-size:14px;font-weight:600;flex:none;padding-top:3px}
+  .qa .qtx{flex:1}
+  .qa .chev{color:var(--tx3);transition:transform .25s ease;margin-top:3px}
+  .qa[open] .chev{transform:rotate(90deg)}
+  .answer{border-top:1px solid var(--line2);padding:16px 22px 20px 52px;color:var(--tx2);
+    font-size:15px;line-height:1.8;animation:rise .25s ease both}
+  .answer p{margin:0 0 10px}.answer p:last-child{margin-bottom:0}
+  .answer b{color:var(--tx);font-weight:600}
+  .src{display:inline-block;margin-top:8px;font-size:13px;color:var(--tx3);
+    background:#f5f7f9;border-radius:6px;padding:3px 10px}
+  .story{display:grid;grid-template-columns:230px 1fr;gap:30px;align-items:start;margin-top:4px}
+  .rail{position:sticky;top:24px;background:var(--card);border:1px solid var(--line);
+    border-radius:var(--r);padding:20px 18px}
+  .rail h3{font-size:15px;font-weight:600;margin:0 0 16px;color:var(--tx2)}
+  .rail-item{display:flex;gap:11px;align-items:center;padding:8px 6px;border-radius:8px;
+    color:var(--tx3);font-size:14px;transition:color .25s ease,background .25s ease,transform .25s ease}
+  .rail-item .dot{width:9px;height:9px;border-radius:50%;background:var(--line);flex:none;
+    transition:background .25s ease,transform .25s ease}
+  .rail-item.on{color:var(--accent);background:var(--accentbg);transform:translateX(3px)}
+  .rail-item.on .dot{background:var(--accent);transform:scale(1.25)}
+  .railbar{height:4px;background:var(--line2);border-radius:4px;margin-top:16px;overflow:hidden}
+  .railbar span{display:block;height:100%;width:14%;background:var(--accent);
+    border-radius:4px;transition:width .3s ease}
+  .steps{min-width:0}
+  .step{background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+    padding:26px 28px;margin-bottom:20px;opacity:.62;
+    transition:opacity .3s ease,border-color .3s ease,transform .3s ease}
+  .step.on{opacity:1;border-color:#cbd9ec;transform:translateX(3px)}
+  .steptop{display:flex;align-items:center;gap:12px;margin-bottom:12px;flex-wrap:wrap}
+  .stepno{font-size:14px;font-weight:600;color:#fff;background:var(--accent);
+    border-radius:8px;padding:4px 11px;font-variant-numeric:tabular-nums}
+  .stepno.warm{background:var(--warn)}
+  h3.st{font-size:21px;font-weight:600;margin:0}
+  .step p{margin:0 0 12px;color:var(--tx2);font-size:16px}
+  .step p:last-child{margin-bottom:0}
+  .step b{color:var(--tx);font-weight:600}
+  .pill{display:inline-flex;align-items:center;gap:6px;border-radius:7px;padding:4px 11px;
+    font-size:14px;background:var(--accentbg);color:var(--accent);margin:0 6px 6px 0}
+  .pill.warm{background:var(--warnbg);color:var(--warn)}
+  .pill.ok{background:var(--okbg);color:var(--ok)}
+  .flowmini{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 4px}
+  .fnode{border:1px solid var(--line);border-radius:10px;padding:10px 14px;min-width:104px;
+    background:#fbfcfd;transition:transform .2s ease,border-color .2s ease}
+  .fnode:hover{transform:translateY(-2px);border-color:var(--accent)}
+  .fnode b{display:block;font-size:17px;color:var(--accent);font-variant-numeric:tabular-nums}
+  .fnode span{font-size:14px;color:var(--tx2)}
+  .fnode small{display:block;font-size:13px;color:var(--tx3)}
+  .stop{background:var(--warnbg);border:1px solid #f0dcb8;border-radius:var(--r);
+    padding:26px 28px;margin-bottom:20px}
+  .stop .big{font-size:24px;font-weight:600;color:#8a4e08;line-height:1.4;margin:0 0 10px}
+  .stop p{margin:0;color:#7b5a2a;font-size:16px}
+  .timeline{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px}
+  .tl{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+  .tl b{display:block;font-size:15px;color:var(--accent);margin-bottom:6px}
+  .tl.warm b{color:var(--warn)}
+  .tl span{font-size:14px;color:var(--tx2)}
+  .nums{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin:22px 0 0}
+  .num{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px 20px}
+  .num .n{font-size:29px;font-weight:600;font-variant-numeric:tabular-nums;line-height:1.2}
+  .num .l{font-size:14px;color:var(--tx3);margin-top:4px}
+  .cta{background:var(--accentbg);border:1px solid #d3e2f6;border-radius:var(--r);
+    padding:26px 28px;margin-top:36px}
+  .cta h3{margin:0 0 8px;font-size:20px;font-weight:600}
+  .cta p{margin:0 0 16px;color:var(--tx2);font-size:15px}
+  .cta a{display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:#fff;
+    text-decoration:none;border-radius:9px;padding:11px 20px;font-weight:600;
+    transition:transform .2s ease,background .2s ease}
+  .cta a:hover{transform:translateY(-2px);background:#174d8b}
+  footer{border-top:1px solid var(--line);margin-top:44px;padding-top:20px;
+    color:var(--tx3);font-size:14px;line-height:1.8}
+  .loadnote{color:var(--warn);font-size:14px;margin-top:12px}
+  @keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  @media (max-width:700px){
+    h1{font-size:30px}.sub{font-size:16px}
+    .story{grid-template-columns:1fr;gap:16px}
+    .rail{position:static;padding:14px 16px}
+    .rail h3{margin-bottom:8px}
+    .rail .rail-item{display:none}
+    .timeline{grid-template-columns:1fr}
+    .answer{padding-left:22px}
+    .step,.stop,.cta{padding:20px}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;
+      transition-duration:.01ms!important}
+    .step{opacity:1}
+  }
+</style>
+</head>
+<body>
+<svg xmlns="http://www.w3.org/2000/svg" style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true">
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M19 12H5m0 0 6-6m-6 6 6 6" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-chev" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-spark" viewBox="0 0 24 24"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5.9 1.1 1 1.6h5c.1-.5.4-1.1 1-1.6A6 6 0 0 0 12 3z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 7v5.5l3.5 2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+  <symbol id="i-filter" viewBox="0 0 24 24"><path d="M3 5h18l-7 8v6l-4 2v-8z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></symbol>
+  <symbol id="i-flow" viewBox="0 0 24 24"><rect x="2" y="9" width="5" height="6" rx="1.2" fill="none" stroke="currentColor" stroke-width="1.8"/><rect x="9.5" y="9" width="5" height="6" rx="1.2" fill="none" stroke="currentColor" stroke-width="1.8"/><rect x="17" y="9" width="5" height="6" rx="1.2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M7 12h2.5M14.5 12H17" fill="none" stroke="currentColor" stroke-width="1.8"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 2.5 4 6v6c0 5 3.4 8.4 8 9.5 4.6-1.1 8-4.5 8-9.5V6z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="m8.5 12 2.5 2.5 4.5-5" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-db" viewBox="0 0 24 24"><ellipse cx="12" cy="5.5" rx="8" ry="3" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M4 5.5v13c0 1.7 3.6 3 8 3s8-1.3 8-3v-13" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3" fill="none" stroke="currentColor" stroke-width="1.8"/></symbol>
+</svg>
+
+<div class="wrap">
+<div class="topline">
+  <a class="back" href="index.html"><svg class="ic" aria-hidden="true"><use href="#i-arrow"/></svg>规则库查询页</a>
+  <span class="kicker"><svg class="ic" aria-hidden="true"><use href="#i-spark"/></svg>给不懂医保的人看的那一页</span>
+</div>
+
+<header>
+  <h1>一次住院，医保的钱<br>到底是怎么定下来的？</h1>
+  <p class="sub">不讲术语，跟着走一遍就懂：从病案首页的编码，到「为什么医院没法当场告诉你报多少」。所有数字都来自这个仓库里真跑出来的规则库，不是编的。</p>
+  <p class="disclaim">本项目为独立研究实现，与发布机构无隶属关系，未获任何官方认证。仅使用公开数据，<b>不含任何真实病案</b>；本页不是分组器，也不是报销计算器，不构成结算或支付意见，结果以医保经办机构最终认定为准。</p>
+</header>
+
+<div class="jump">
+  <a href="#s1">① 先看六个反直觉的问题</a>
+  <a href="#s2">② 跟着走一遍流程</a>
+  <a href="#s3">③ 这些数字从哪来</a>
+</div>
+
+<section id="s1">
+  <div class="sechead"><span class="secno">01 / 钩子</span><h2>先戳破六个想当然</h2></div>
+  <p class="sechint">点开任意一张看答案。它们都是这个仓库里被反复核对过的口径。</p>
+  <div class="cards">
+    <details class="qa">
+      <summary><span class="qno">Q1</span><span class="qtx">医院为什么不能当场告诉你「这次能报多少」？</span><svg class="ic chev" aria-hidden="true"><use href="#i-chev"/></svg></summary>
+      <div class="answer">
+        <p>因为 DIP 里每分对应多少钱（<b>点值</b>）不是固定价格，而是 <b>可用于 DIP 结算的基金总额 ÷ 统筹区内所有病例的总分值</b>。分子和分母都要等结算年度结束才知道。</p>
+        <p>年内既不知道全年病例总量，也不知道清算后的基金实际支出，所以「实时点值」在机制上不存在。</p>
+        <span class="src">依据 · docs/PAYMENT_SCOPE.md 第 2 节</span>
+      </div>
+    </details>
+    <details class="qa">
+      <summary><span class="qno">Q2</span><span class="qtx">国家发的表里，为什么找不到「分值」？</span><svg class="ic chev" aria-hidden="true"><use href="#i-chev"/></svg></summary>
+      <div class="answer">
+        <p>逐表实测过：官方 3.0 附件共 10 张工作表，<b>没有分值列，也没有点数列</b>。它定义的是「病种怎么形成、怎么入组」。</p>
+        <p>各病种的分值由每个统筹区按本地历史费用数据自己测算，是<b>地方参数</b>。谁说能从国家表直接算出分值，谁就是在硬编码或编造。</p>
+        <span class="src">依据 · docs/PAYMENT_SCOPE.md 第 1 节</span>
+      </div>
+    </details>
+    <details class="qa">
+      <summary><span class="qno">Q3</span><span class="qtx">「5125 个病种」这个数，凭什么敢信？</span><svg class="ic chev" aria-hidden="true"><use href="#i-chev"/></svg></summary>
+      <div class="answer">
+        <p>因为它是<b>官方公布口径</b>，而且被写成了 CI 里会变红的断言：解析出来的核心病种数不等于 5125、基层病种数不等于 127，构建就直接失败。</p>
+        <p>换句话说，这里不靠「我相信我解析对了」，靠的是<b>口径错了立刻红</b>。下方数字卡是现场从校验结果里读出来的。</p>
+        <span class="src">依据 · pipeline/validate.py · 校验结果页</span>
+      </div>
+    </details>
+    <details class="qa">
+      <summary><span class="qno">Q4</span><span class="qtx">入组成功，就等于能拿到钱了吗？</span><svg class="ic chev" aria-hidden="true"><use href="#i-chev"/></svg></summary>
+      <div class="answer">
+        <p>不等于。入组只确定「这个病例算哪个病种」，后面还有高低倍率病例、特病单议、歧义组（QY）、结余留用与超支分担、质量考核，以及起付线、封顶线、自费项目、参保类型等规则。</p>
+        <p>所以「入组结果」到「报销金额」之间不是一步映射。本仓库止步于规则结构化，不做支付金额计算。</p>
+        <span class="src">依据 · docs/PAYMENT_SCOPE.md 第 3 节</span>
+      </div>
+    </details>
+    <details class="qa">
+      <summary><span class="qno">Q5</span><span class="qtx">病种表里为什么会有「所有诊断」这种名字？</span><svg class="ic chev" aria-hidden="true"><use href="#i-chev"/></svg></summary>
+      <div class="answer">
+        <p>它是官方表里的<b>说明性文字</b>，表示先期分组不限制诊断，并不是一个 ICD 编码。实测有 15 条。</p>
+        <p>如果把它当成编码建索引，查询就会多出一批假命中。本仓库的索引按设计过滤掉它，并在测试里把这类排除项单独列出、说明原因。</p>
+        <span class="src">依据 · tests/verify_roundtrip.py 排除项口径</span>
+      </div>
+    </details>
+    <details class="qa">
+      <summary><span class="qno">Q6</span><span class="qtx">没做手术，也能分到一个病种吗？</span><svg class="ic chev" aria-hidden="true"><use href="#i-chev"/></svg></summary>
+      <div class="answer">
+        <p>能。基础规则表 3268 行里，有 <b>1960 行</b>的手术操作编码是空的，也就是保守治疗组，靠诊断就能入组。</p>
+        <p>这是新手写分组器最容易漏的一条路径；本项目把它写进了基线断言，防止解析口径被静默改坏。</p>
+        <span class="src">依据 · 23 条断言中的「t07 纯诊断入组行数」</span>
+      </div>
+    </details>
+  </div>
+</section>
+
+<section id="s2" style="margin-top:52px">
+  <div class="sechead"><span class="secno">02 / 主线</span><h2>跟着一个虚构示例，走完整条链</h2></div>
+  <p class="sechint">往下滚，左侧会跟着高亮。示例只用编码，不涉及任何真实病人与费用。</p>
+  <div class="story">
+    <aside class="rail">
+      <h3>走到哪一步了</h3>
+      <div class="rail-item on" data-r="0"><span class="dot"></span>起点 · 病案首页编码</div>
+      <div class="rail-item" data-r="1"><span class="dot"></span>先查排除表</div>
+      <div class="rail-item" data-r="2"><span class="dot"></span>四级优先级匹配</div>
+      <div class="rail-item" data-r="3"><span class="dot"></span>命中一个病种</div>
+      <div class="rail-item" data-r="4"><span class="dot"></span>分值 · 地方参数</div>
+      <div class="rail-item" data-r="5"><span class="dot"></span>点值 · 年终清算</div>
+      <div class="rail-item" data-r="6"><span class="dot"></span>结算 · 入组只是起点</div>
+      <div class="railbar"><span id="railfill"></span></div>
+    </aside>
+    <div class="steps">
+      <article class="step on" data-s="0">
+        <div class="steptop"><span class="stepno">00</span><h3 class="st">起点：病案首页上的几个编码</h3></div>
+        <p>一份出院病案里，和分组有关的主要是 <b>主要诊断、其他诊断、手术操作</b> 的编码。比如主要诊断写的是 <span class="pill mono">C34.1</span>，有没有手术操作，会直接决定后面落到哪一类。</p>
+        <p>这里只讲编码怎么流动，<b>不接收也不展示任何真实病案</b>。</p>
+      </article>
+
+      <article class="step" data-s="1">
+        <div class="steptop"><span class="stepno">01</span><h3 class="st">先别急着分组，先查「不纳入」</h3></div>
+        <p>官方附件里有两张排除表：不纳入分组的诊断、不纳入分组的手术操作，合计 <b data-num="excluded">—</b> 行。它们是<b>前置判据</b>，先查排除，再谈入组。</p>
+        <p><span class="pill"><svg class="ic" aria-hidden="true"><use href="#i-filter"/></svg>诊断排除表 4742 行</span><span class="pill"><svg class="ic" aria-hidden="true"><use href="#i-filter"/></svg>手术操作排除表 4111 行</span></p>
+      </article>
+
+      <article class="step" data-s="2">
+        <div class="steptop"><span class="stepno">02</span><h3 class="st">按官方给的顺序，一层层匹配</h3></div>
+        <p>官方表的「分类」列不只是标签，它就是<b>匹配调度顺序</b>：先判先期分组，再判诊断辅助细分，然后并项规则，最后才是基础规则。数字是仓库实测的分类分布。</p>
+        <div class="flowmini">
+          <div class="fnode"><b>XQ</b><span>先期分组</span><small data-num="XQ">—</small></div>
+          <div class="fnode"><b>FZ</b><span>诊断辅助细分</span><small data-num="FZ">—</small></div>
+          <div class="fnode"><b>BX</b><span>并项规则</span><small data-num="BX">—</small></div>
+          <div class="fnode"><b>JC</b><span>基础规则</span><small data-num="JC">—</small></div>
+        </div>
+        <p style="margin-top:14px">两个容易踩的坑：同一个单元格里用 <span class="pill mono">|</span> 分隔多个编码（实测 1829 个单元格），以及形如 <span class="pill mono">C00-C75</span> 的区间码（54 条）。都得先展开再匹配。</p>
+      </article>
+
+      <article class="step" data-s="3">
+        <div class="steptop"><span class="stepno">03</span><h3 class="st">命中一个病种</h3></div>
+        <p>走到这里，病例被归到核心病种库里的某一个病种（官方公布 <b data-num="core">—</b> 个），或者落在单独成表的基层病种（<b data-num="primary">—</b> 个）。</p>
+        <p>到此为止，做的都是<b>确定性查表</b>：同样的编码，永远得到同样的结果。这也是这个项目能被反复验证的前提。</p>
+        <p><span class="pill ok"><svg class="ic" aria-hidden="true"><use href="#i-shield"/></svg>规则库自回查 5084 / 5084，零失配</span></p>
+      </article>
+
+      <div class="stop">
+        <p class="big">停一下：走到这里，还是不知道这次能报多少钱。</p>
+        <p>因为国家表只负责「算哪个病种」，不给分值；分值在各统筹区手里，点值要等年底清算。下面两步才是钱的部分，也都是本仓库<b>故意不做</b>的部分。</p>
+      </div>
+
+      <article class="step" data-s="4">
+        <div class="steptop"><span class="stepno warm">04</span><h3 class="st">分值：不在国家表里，是地方参数</h3></div>
+        <p>每个病种值多少「分」，由各统筹区依据本地历史费用数据测算，属于<b>地方参数</b>。同一个病种在不同统筹区，分值可以不一样。</p>
+        <p>本仓库把分值设计成外部可插拔参数：解析脚本只做格式转换与索引，<b>不生成、不推断、不内置</b>任何分值表。</p>
+      </article>
+
+      <article class="step" data-s="5">
+        <div class="steptop"><span class="stepno warm">05</span><h3 class="st">点值：要等这一年过完</h3></div>
+        <p><b>点值 = 可用于 DIP 结算的基金总额 ÷ 统筹区内所有病例的总分值。</b></p>
+        <p>分子分母都要在结算年度结束后才能确定，所以年内只能做<b>参数化测算</b>（给一个假设点值看敏感性），而且必须标明「测算值 · 非结算结果」。</p>
+        <div class="timeline">
+          <div class="tl"><b>年内</b><span>入组、记录分值，点值未知</span></div>
+          <div class="tl warm"><b>年终清算</b><span>基金总额与全年总分值确定，算出点值</span></div>
+          <div class="tl"><b>清算之后</b><span>经审核、结余留用等调整，形成结算结果</span></div>
+        </div>
+      </article>
+
+      <article class="step" data-s="6">
+        <div class="steptop"><span class="stepno">06</span><h3 class="st">结算：入组只是起点</h3></div>
+        <p>高低倍率病例、特病单议、歧义组（QY）、结余留用与超支分担、质量考核，以及起付线、封顶线、自费项目、参保类型等，都会影响最终支付额，<b>都不在国家分组方案附件范围内</b>。</p>
+        <p>所以本仓库到「规则与口径的结构化」为止。想核对某条规则原文，去查询页按编码搜，能看到它来自哪张工作表、Excel 第几行。</p>
+        <p><span class="pill"><svg class="ic" aria-hidden="true"><use href="#i-clock"/></svg>点值须年终清算 · 不存在实时点值</span></p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section id="s3" style="margin-top:52px">
+  <div class="sechead"><span class="secno">03 / 底稿</span><h2>这一页的数字，是从哪来的</h2></div>
+  <p class="sechint">不是手写在页面里的常量，而是从同一仓库的校验结果现场读取。换一份源文件重跑，这里会跟着变。</p>
+  <div class="nums">
+    <div class="num"><div class="n" data-num="sheets">—</div><div class="l">官方工作表</div></div>
+    <div class="num"><div class="n" data-num="rows">—</div><div class="l">有效数据行</div></div>
+    <div class="num"><div class="n" data-num="core2">—</div><div class="l">核心病种（官方公布）</div></div>
+    <div class="num"><div class="n" data-num="primary2">—</div><div class="l">基层病种（官方公布）</div></div>
+    <div class="num"><div class="n" data-num="checks">—</div><div class="l">CI 持续复跑的断言</div></div>
+  </div>
+  <p class="loadnote" id="loadnote" hidden>校验结果未载入：请通过静态服务打开本页（如 <span class="mono">python -m http.server 8000 -d web</span>），浏览器直接打开本地文件会被拦截。</p>
+  <p class="hint" style="color:var(--tx3);font-size:14px;margin-top:14px">其中 4 条断言来自官方公布口径，其余 19 条是首次解析成功后锁定的结构基线，用于防止编码口径被静默改坏——<b>基线数字不是官方数字</b>。源文件 SHA256：<span class="mono" data-num="sha">—</span>。</p>
+
+  <div class="cta">
+    <h3>想自己核对？</h3>
+    <p>查询页可以按 ICD 编码搜到规则原文、来源工作表与 Excel 行号；校验结果页能看到 23 条断言逐条跑出来的结果。</p>
+    <a href="index.html"><svg class="ic" aria-hidden="true"><use href="#i-db"/></svg>打开规则库查询页</a>
+  </div>
+</section>
+
+<footer>
+  数据来源：国家医保局公开的《按病种分值（DIP）付费 3.0 版分组方案》。本页为独立研究实现的科普说明，未获任何官方认证，与发布机构无隶属关系；不含真实病案，不构成结算或支付意见。<br>
+  页面数据由 <span class="mono">pipeline/validate.py</span> 生成，规则库由 <span class="mono">pipeline/extract.py</span> 从公开 Excel 重建；换版本只换源文件，不改代码。
+</footer>
+</div>
+
+<script>
+(function(){
+  var fmt=function(n){return String(n).replace(/\B(?=(\d{3})+(?!\d))/g,',');};
+  function put(key,val){
+    var nodes=document.querySelectorAll('[data-num="'+key+'"]');
+    for(var i=0;i<nodes.length;i++) nodes[i].textContent=val;
+  }
+  fetch('data/validation.json').then(function(r){
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    return r.json();
+  }).then(function(v){
+    var b=v.breakdown||{}, m=v.meta||{};
+    var byLabel={};
+    (v.checks||[]).forEach(function(c){byLabel[c.label]=c.actual;});
+    put('sheets',fmt(v.sheet_count!=null?v.sheet_count:m.sheet_parsed));
+    put('rows',fmt(m.row_total!=null?m.row_total:byLabel['有效数据行总数']));
+    put('core',fmt(v.core_total)); put('core2',fmt(v.core_total));
+    put('primary',fmt(v.primary_total)); put('primary2',fmt(v.primary_total));
+    put('checks',fmt((v.checks||[]).length));
+    put('excluded',fmt(byLabel['排除表行数合计']!=null?byLabel['排除表行数合计']:8853));
+    ['XQ','FZ','BX','JC'].forEach(function(k){ put(k,fmt(b[k])+' 条'); });
+    put('sha',String(m.source_sha256||'').slice(0,16)+'…');
+  }).catch(function(){
+    document.getElementById('loadnote').hidden=false;
+  });
+
+  var steps=[].slice.call(document.querySelectorAll('.step'));
+  var railItems=[].slice.call(document.querySelectorAll('.rail-item'));
+  var fill=document.getElementById('railfill');
+  function activate(i){
+    steps.forEach(function(s,k){ s.classList.toggle('on',k<=i); });
+    railItems.forEach(function(r,k){ r.classList.toggle('on',k===i); });
+    if(fill) fill.style.width=Math.round((i+1)/railItems.length*100)+'%';
+  }
+  if('IntersectionObserver' in window && steps.length){
+    var io=new IntersectionObserver(function(entries){
+      var best=null;
+      entries.forEach(function(e){
+        if(e.isIntersecting && (!best || e.intersectionRatio>best.intersectionRatio)) best=e;
+      });
+      if(best){
+        var idx=parseInt(best.target.getAttribute('data-s'),10);
+        if(!isNaN(idx)) activate(idx);
+      }
+    },{rootMargin:'-25% 0px -55% 0px',threshold:[0,.25,.5,1]});
+    steps.forEach(function(s){io.observe(s);});
+  }else{
+    activate(steps.length-1);
+  }
+})();
+</script>
+</body>
+</html>

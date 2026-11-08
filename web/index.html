@@ -27,6 +27,12 @@
   h1{font-size:30px;line-height:1.25;font-weight:600;margin:0;letter-spacing:-.3px}
   .sub{color:var(--tx2);font-size:16px;margin:10px 0 0}
   .disclaim{color:var(--tx3);font-size:13px;margin-top:12px;line-height:1.65}
+  .storylink{margin-top:16px}
+  .storylink a{display:inline-flex;align-items:center;gap:8px;background:var(--warnbg);
+    color:var(--warn);border:1px solid #f0dcb8;border-radius:10px;padding:10px 16px;
+    text-decoration:none;font-size:15px;font-weight:600;
+    transition:transform .2s ease,border-color .2s ease}
+  .storylink a:hover{transform:translateY(-2px);border-color:var(--warn)}
   nav{display:flex;gap:8px;margin-bottom:28px;border-bottom:1px solid var(--line);overflow-x:auto}
   nav button{background:none;border:none;border-bottom:2px solid transparent;padding:12px 20px;
     font:inherit;color:var(--tx2);cursor:pointer;white-space:nowrap;
@@ -180,6 +186,7 @@
   <symbol id="i-chev" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
   <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 2.5 4 6v6c0 5 3.4 8.4 8 9.5 4.6-1.1 8-4.5 8-9.5V6z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="m8.5 12 2.5 2.5 4.5-5" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></symbol>
   <symbol id="i-empty" viewBox="0 0 64 64"><rect x="10" y="12" width="44" height="40" rx="6" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M10 24h44M22 32h20M22 40h13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><circle cx="46" cy="44" r="11" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="m54 52 7 7" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></symbol>
+  <symbol id="i-spark" viewBox="0 0 24 24"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5.9 1.1 1 1.6h5c.1-.5.4-1.1 1-1.6A6 6 0 0 0 12 3z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
 </svg>
 
 <div class="wrap">
@@ -190,6 +197,7 @@
   </div>
   <p class="sub">基于国家医保局公开的《按病种分值（DIP）付费 3.0 版分组方案》· 从公开 Excel 一键重建 · 以官方公布口径持续校验</p>
   <p class="disclaim">本项目为独立研究实现，与发布机构无隶属关系，未获任何官方认证。仅使用公开数据，不含真实病案；本页不是分组器，不构成结算或支付意见，结果以医保经办机构最终认定为准。</p>
+  <p class="storylink"><a href="explain.html"><svg class="ic" aria-hidden="true"><use href="#i-spark"/></svg>第一次来？先看「一次住院，医保的钱是怎么定下来的」<svg class="ic" aria-hidden="true"><use href="#i-chev"/></svg></a></p>
 </header>
 
 <nav>
