@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>你是 DIP 里的哪个病种？</title>
+<style>
+:root{
+  --bg:#faf8f4; --card:#ffffff; --tx:#1f2328; --tx2:#5b6570; --tx3:#66717d;
+  --line:#e3e6ea; --line2:#eef0f3; --ac:#1f5fa8; --acbg:#eaf1fb;
+  --warn:#a8620d; --warnbg:#fdf3e3; --r:14px;
+  --xq:#a8332a; --fz:#8a5b13; --bx:#2f6b5e; --jc:#1f5fa8;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+  font-size:16px;line-height:1.7;-webkit-font-smoothing:antialiased}
+.wrap{max-width:720px;margin:0 auto;padding:28px 18px 60px}
+header{text-align:center;margin-bottom:26px}
+.kicker{display:inline-block;background:var(--acbg);color:var(--ac);font-size:13px;
+  padding:5px 13px;border-radius:999px;letter-spacing:.04em}
+h1{font-family:"Yuanti SC","YouYuan","PingFang SC","Microsoft YaHei",sans-serif;font-size:32px;font-weight:400;margin:14px 0 8px;letter-spacing:0;line-height:1.28}
+.sub{color:var(--tx2);font-size:15px;margin:0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+  padding:24px;box-shadow:0 6px 24px rgba(78,62,38,.05);margin-bottom:18px;
+  animation:rise .35s ease both}
+@keyframes rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.qhead{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.qnum{width:30px;height:30px;flex:none;border-radius:10px;background:var(--ac);color:#fff;
+  display:grid;place-items:center;font-size:14px;font-weight:700}
+.qtitle{font-size:18px;font-weight:650;margin:0}
+.opts{display:grid;gap:10px}
+.opt{width:100%;text-align:left;border:1px solid var(--line);background:#fdfcf9;
+  border-radius:12px;padding:13px 16px;font-size:15px;color:var(--tx);cursor:pointer;
+  font-family:inherit;line-height:1.55;transition:transform .24s ease,border-color .18s,background .18s}
+.opt:hover{transform:translateY(-2px);border-color:#c9d3e2;background:#f6f2ea}
+.opt.sel{border-color:var(--ac);background:var(--acbg);color:var(--ac);font-weight:600}
+.bar{height:6px;background:var(--line);border-radius:99px;overflow:hidden;margin:18px 0 6px}
+.bar>i{display:block;height:100%;width:0;background:var(--ac);border-radius:99px;
+  transition:width .3s ease}
+.prog{font-size:13px;color:var(--tx3);text-align:right}
+.hidden{display:none!important}
+.btn{border:0;border-radius:12px;padding:14px 26px;font-size:16px;font-weight:650;
+  font-family:inherit;cursor:pointer;transition:transform .24s ease,box-shadow .24s ease;
+  background:var(--ac);color:#fff;box-shadow:0 6px 16px rgba(31,95,168,.25)}
+.btn:hover{transform:translateY(-2px);box-shadow:0 10px 22px rgba(31,95,168,.32)}
+.btn:active{transform:scale(.98)}
+.btn.ghost{background:#fff;color:var(--ac);border:1px solid #c9d3e2;box-shadow:none}
+.btnrow{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:8px}
+.result{text-align:center}
+.badge{display:inline-block;width:96px;height:96px;border-radius:26px;color:#fff;
+  font-size:38px;font-weight:800;line-height:96px;letter-spacing:.02em;margin-bottom:12px}
+.rname{font-size:26px;font-weight:750;margin:0 0 4px}
+.rdesc{color:var(--tx2);margin:0 0 18px}
+.rnum{font-size:38px;font-weight:800;letter-spacing:-.02em;line-height:1.1}
+.rnum span{font-size:15px;font-weight:500;color:var(--tx3);letter-spacing:0}
+.rquote{background:var(--acbg);border-radius:12px;padding:14px 16px;margin:18px 0;
+  font-size:15px;text-align:left}
+.legend{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:18px 0 4px}
+.legend div{border:1px solid var(--line);border-radius:10px;padding:9px 4px;font-size:12px;color:var(--tx2)}
+.legend b{display:block;font-size:17px;color:var(--tx)}
+.foot{font-size:12px;color:var(--tx3);line-height:1.75;text-align:center;margin-top:22px}
+.foot a{color:var(--ac);text-decoration:none}
+.warn{background:#fff6e9;border:1px solid #f3ddb5;color:#8a5b13;border-radius:10px;
+  padding:10px 14px;font-size:13px;text-align:center;margin-bottom:16px}
+@media(max-width:600px){.wrap{padding:18px 12px 44px}h1{font-size:24px}.card{padding:18px}
+  .legend{grid-template-columns:repeat(2,1fr)}.badge{width:78px;height:78px;line-height:78px;font-size:30px}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+.back{display:inline-flex;align-items:center;gap:7px;text-decoration:none;color:var(--tx2);
+  background:#fff;border:1px solid var(--line);border-radius:9px;padding:9px 15px;font-size:15px;
+  line-height:1;margin:0 0 18px;transition:transform .24s ease,border-color .24s ease,color .24s ease}
+.back:hover{transform:translateX(-2px);border-color:var(--ac);color:var(--ac)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<a class="back" href="showcase.html">← 三个入口</a>
+<header>
+  <span class="kicker">纯娱乐 · 6 道题</span>
+  <h1>你是 DIP 里的哪个病种？</h1>
+  <p class="sub">国家医保局的病种目录里，其实藏着四种「性格」</p>
+</header>
+
+<div class="warn">这不是医疗建议，跟你的健康、报销金额一点关系都没有。</div>
+
+<div id="quiz">
+  <div id="qbox"></div>
+  <div class="bar"><i id="barfill"></i></div>
+  <div class="prog" id="prog">0 / 6</div>
+</div>
+
+<div id="result" class="hidden">
+  <div class="card result">
+    <div class="badge" id="rbadge">XQ</div>
+    <p class="rname" id="rname"></p>
+    <p class="rdesc" id="rdesc"></p>
+    <div class="rnum" id="rnum"></div>
+    <div class="rquote" id="rquote"></div>
+    <div class="legend">
+      <div>XQ 先期<b>19</b></div><div>FZ 细分<b>113</b></div>
+      <div>BX 并项<b>1725</b></div><div>JC 基础<b>3268</b></div>
+    </div>
+    <div class="btnrow">
+      <button class="btn" id="save">保存结果卡 PNG</button>
+      <button class="btn ghost" id="again">再测一次</button>
+    </div>
+  </div>
+</div>
+
+<p class="foot">
+数据源：国家医保局《按病种分值（DIP）付费 3.0 版分组方案》公开附件（2026-09-09）<br>
+本项目为独立研究实现，与发布机构无隶属关系，未获任何官方认证；不含真实病案，不构成结算或支付意见。<br>
+数字取自规则基线数据集的 23 条断言 ·
+<a href="https://github.com/Meekoriela/cn-dip3-rule-baseline">GitHub</a> ·
+<a href="https://meekoriela.github.io/cn-dip3-rule-baseline/">在线核对</a>
+</p>
+</div>
+
+<script>
+var TYPES={
+  XQ:{name:'XQ 型 · 先期组',color:'#a8332a',num:'19',unit:'/ 5125 个核心病种',
+      desc:'稀有、一锤定音，第一个开口的那个',
+      quote:'「只有 19 个名额，但规则说：先听我的。」先期分组排在四级判定最前面，命中就不再往下走。',
+      line:'在 5125 个核心病种里只占 19 个'},
+  FZ:{name:'FZ 型 · 诊断辅助细分',color:'#8a5b13',num:'113',unit:'个核心病种',
+      desc:'细节控，专管最麻烦的那些情况',
+      quote:'「烧伤到几度、面积多少、是不是耐药……这些都得问清楚。」FZ 表比别的表多了两列维度。',
+      line:'113 条，还会用 C00-C75 这种区间码'},
+  BX:{name:'BX 型 · 并项规则',color:'#2f6b5e',num:'1725',unit:'个核心病种',
+      desc:'多面手，一个诊断能配上好几个操作',
+      quote:'「不是一对一，是一对多。」并项表里 1829 个单元格用竖线写着好几个编码。',
+      line:'1725 条，多编码最密集的一组'},
+  JC:{name:'JC 型 · 基础规则',color:'#1f5fa8',num:'3268',unit:'个核心病种（63.8%）',
+      desc:'老实人，活最多，话最少',
+      quote:'「没做手术也能进组。」3268 条里约 1960 行只靠一句主要诊断就定了。',
+      line:'占全部核心病种的 63.8%'}
+};
+var Q=[
+ ['刚进一个全是规矩的新地方，你第一件事是？',[
+   ['先把总规矩摸清楚，一句话定调','XQ'],
+   ['翻细则，专找「特殊情况怎么办」','FZ'],
+   ['看看一件事能同时接上哪几条线','BX'],
+   ['先把手上的活默默干完','JC']]],
+ ['朋友丢来一句「帮我看看这个」，你通常会？',[
+   ['先问一句：最关键的是哪条？','XQ'],
+   ['逐字看，连括号里的字都不放过','FZ'],
+   ['顺手把它和另外三件事一起办了','BX'],
+   ['不吭声，直接给结果','JC']]], ['团队里，别人最常怎么形容你？',[
+   ['「他一开口基本就定了」','XQ'],
+   ['「太较真了」','FZ'],
+   ['「同时开八个窗口」','BX'],
+   ['「靠谱，但不太说话」','JC']]], ['遇到「这种情况没写明」，你的反应是？',[
+   ['先看有没有更高一层的规定','XQ'],
+   ['把例外条件一条条列出来','FZ'],
+   ['找几个能合并的类似情况','BX'],
+   ['按最常见的那种办','JC']]], ['如果给你一张工牌，你希望上面写？',[
+   ['第一顺位','XQ'],
+   ['细节负责人','FZ'],
+   ['多线对接','BX'],
+   ['基础岗 · 常驻','JC']]], ['下班前发现一处小地方没对齐，你会？',[
+   ['确认它会不会影响整体结论','XQ'],
+   ['必须查到那一格为止','FZ'],
+   ['顺带把旁边的关联项也一起核了','BX'],
+   ['记下来，明天照流程处理','JC']]]
+];
+var ORDER=['XQ','FZ','BX','JC'],score={XQ:0,FZ:0,BX:0,JC:0},cur=0,picked=null,last='XQ';
+var qbox=document.getElementById('qbox'),barfill=document.getElementById('barfill'),
+    prog=document.getElementById('prog');
+
+function render(){
+  var q=Q[cur];
+  var h='<div class="card"><div class="qhead"><span class="qnum">'+(cur+1)+'</span>'+
+        '<p class="qtitle">'+q[0]+'</p></div><div class="opts">';
+  q[1].forEach(function(o,i){
+    h+='<button class="opt" data-t="'+o[1]+'" data-i="'+i+'">'+o[0]+'</button>';
+  });
+  h+='</div></div>';
+  qbox.innerHTML=h;
+  barfill.style.width=(cur/Q.length*100)+'%';
+  prog.textContent=cur+' / '+Q.length;
+  var btns=qbox.querySelectorAll('.opt');
+  btns.forEach(function(b){b.addEventListener('click',function(){choose(b,btns);});});
+}
+function choose(b,btns){
+  btns.forEach(function(x){x.classList.remove('sel');});
+  b.classList.add('sel');picked=b.getAttribute('data-t');
+  setTimeout(function(){
+    score[picked]++;cur++;
+    if(cur<Q.length){picked=null;render();}
+    else{finish();}
+  },180);
+}
+function finish(){
+  var best=ORDER[0];
+  ORDER.forEach(function(t){if(score[t]>score[best])best=t;});
+  last=best;
+  var d=TYPES[best];
+  document.getElementById('quiz').classList.add('hidden');
+  document.getElementById('result').classList.remove('hidden');
+  var badge=document.getElementById('rbadge');
+  badge.textContent=best;badge.style.background=d.color;
+  document.getElementById('rname').textContent=d.name;
+  document.getElementById('rdesc').textContent=d.desc;
+  document.getElementById('rnum').innerHTML=d.num+' <span>'+d.unit+'</span>';
+  document.getElementById('rquote').textContent=d.quote;
+  barfill.style.width='100%';prog.textContent='6 / 6';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+document.getElementById('again').addEventListener('click',function(){
+  score={XQ:0,FZ:0,BX:0,JC:0};cur=0;picked=null;
+  document.getElementById('result').classList.add('hidden');
+  document.getElementById('quiz').classList.remove('hidden');
+  render();window.scrollTo({top:0,behavior:'smooth'});
+});
+
+function wrap(ctx,text,x,y,maxw,lh){
+  var line='',yy=y;
+  for(var i=0;i<text.length;i++){
+    var test=line+text[i];
+    if(ctx.measureText(test).width>maxw&&line){ctx.fillText(line,x,yy);line=text[i];yy+=lh;}
+    else line=test;
+  }
+  if(line)ctx.fillText(line,x,yy);
+  return yy+lh;
+}
+document.getElementById('save').addEventListener('click',function(){
+  var d=TYPES[last],W=750,H=1060;
+  var c=document.createElement('canvas');c.width=W;c.height=H;
+  var g=c.getContext('2d');
+  g.fillStyle='#faf8f4';g.fillRect(0,0,W,H);
+  var grd=g.createLinearGradient(0,0,W,300);
+  grd.addColorStop(0,d.color);grd.addColorStop(1,'#5a6bb5');
+  g.fillStyle=grd;g.fillRect(0,0,W,320);
+  g.fillStyle='rgba(255,255,255,.92)';g.font='600 26px sans-serif';
+  g.fillText('你是 DIP 里的哪个病种？',56,80);
+  g.font='800 130px sans-serif';g.fillText(last,56,230);
+  g.font='600 30px sans-serif';g.fillText(d.name,56,285);
+  g.fillStyle='#1f2328';g.font='700 46px sans-serif';
+  var y=wrap(g,d.desc,56,400,W-112,62);
+  g.fillStyle=d.color;g.font='800 96px sans-serif';g.fillText(d.num,56,y+90);
+  g.fillStyle='#5b6570';g.font='500 26px sans-serif';g.fillText(d.unit,56,y+140);
+  g.fillStyle='#eaf1fb';g.fillRect(56,y+190,W-112,150);
+  g.fillStyle='#1f2328';g.font='500 25px sans-serif';
+  wrap(g,d.quote,80,y+235,W-160,40);
+  g.fillStyle='#66717d';g.font='500 21px sans-serif';
+  var fy=y+400;
+  [
+    '数据源：国家医保局《按病种分值（DIP）付费 3.0 版分组方案》公开附件',
+    '独立研究实现 · 未获官方认证 · 不含真实病案 · 不构成结算或支付意见',
+    '纯娱乐，不是医疗建议 · 数字由 23 条断言持续校验',
+    'github.com/Meekoriela/cn-dip3-rule-baseline'
+  ].forEach(function(t){fy=wrap(g,t,56,fy,W-112,32);});
+  var a=document.createElement('a');
+  a.download='DIP人格卡-'+last+'.png';a.href=c.toDataURL('image/png');a.click();
+});
+render();
+</script>
+</body>
+</html>

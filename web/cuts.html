@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>病种砍掉 46%，覆盖反而涨了</title>
+<style>
+:root{
+  --bg:#faf8f4; --card:#ffffff; --tx:#1f2328; --tx2:#5b6570; --tx3:#66717d;
+  --line:#e3e6ea; --line2:#eef0f3; --ac:#1f5fa8; --acbg:#eaf1fb;
+  --warn:#a8620d; --warnbg:#fdf3e3; --r:14px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:-apple-system,BlinkMacSystemFont,
+ "Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;font-size:16px;line-height:1.7}
+.wrap{max-width:860px;margin:0 auto;padding:24px 16px 60px}
+h1{font-family:"Yuanti SC","YouYuan","PingFang SC","Microsoft YaHei",sans-serif;font-size:28px;font-weight:400;margin:0 0 6px;line-height:1.3}
+.sub{color:var(--tx2);font-size:14px;margin:0 0 18px}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:18px}
+.btn{border:0;border-radius:var(--r);padding:12px 22px;font-size:15px;font-weight:650;font-family:inherit;
+ cursor:pointer;background:var(--ac);color:#fff;transition:transform .24s ease,box-shadow .24s ease;
+ box-shadow:0 6px 16px rgba(31,95,168,.22)}
+.btn:hover{transform:translateY(-2px)}
+.btn:active{transform:scale(.98)}
+.btn.ghost{background:#fff;color:var(--ac);border:1px solid var(--line);box-shadow:none}
+#art{width:100%;height:auto;display:block;border-radius:14px;box-shadow:0 8px 30px rgba(78,62,38,.08);
+ background:#fff;animation:rise .4s ease both}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+.back{display:inline-flex;align-items:center;gap:7px;text-decoration:none;color:var(--tx2);
+  background:#fff;border:1px solid var(--line);border-radius:9px;padding:9px 15px;font-size:15px;
+  line-height:1;margin:0 0 18px;transition:transform .24s ease,border-color .24s ease,color .24s ease}
+.back:hover{transform:translateX(-2px);border-color:var(--ac);color:var(--ac)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<a class="back" href="showcase.html">← 三个入口</a>
+<h1>病种砍掉 46%，覆盖反而涨了</h1>
+<p class="sub">点「下载长图 PNG」拿竖版图片，可直接发小红书 / 微博 / 朋友圈。不联网、不上传任何东西。</p>
+<div class="toolbar">
+  <button class="btn" id="dl">下载长图 PNG</button>
+  <button class="btn ghost" id="open">在新标签页看原图</button>
+</div>
+
+<svg id="art" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 2000" width="800" height="2000" font-family="Microsoft YaHei, PingFang SC, sans-serif">
+  <defs>
+    <linearGradient id="top" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2b3a72"/><stop offset="1" stop-color="#1f5fa8"/>
+    </linearGradient>
+    <linearGradient id="barA" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#aeb8d8"/><stop offset="1" stop-color="#8896c4"/>
+    </linearGradient>
+    <linearGradient id="barB" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#1f5fa8"/><stop offset="1" stop-color="#37b39a"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="800" height="2000" fill="#ffffff"/>
+  <rect width="800" height="660" fill="url(#top)"/>
+
+  <text x="60" y="86" font-size="22" fill="#c9d3e2" letter-spacing="2">国家医保局 · DIP 3.0</text>
+  <text x="60" y="180" font-size="68" font-weight="800" fill="#ffffff">病种砍掉 46%</text>
+  <text x="60" y="268" font-size="68" font-weight="800" fill="#ffffff">覆盖的病人</text>
+  <text x="60" y="356" font-size="68" font-weight="800" fill="#8de2c8">反而多了 3%</text>
+  <rect x="60" y="400" width="86" height="6" rx="3" fill="#8de2c8"/>
+  <text x="60" y="462" font-size="26" fill="#d7dfeb">核心病种 9520 → 5125，病例覆盖 92% → 95%</text>
+  <text x="60" y="508" font-size="22" fill="#c9d3e2">我把那份公开的 Excel 拆开数了一遍</text>
+  <text x="60" y="600" font-size="20" fill="#8fa0dd">数据源：国家医保局发布会 / 新华网 2026-09-07 · 医保局解读系列第三篇 2026-10-23</text>
+
+  <text x="60" y="732" font-size="24" fill="#5b6570">2.0 版核心病种</text>
+  <text x="60" y="812" font-size="76" font-weight="800" fill="#8896c4">9520</text>
+  <text x="60" y="852" font-size="22" fill="#66717d">个</text>
+
+  <path d="M470 770 L640 770" stroke="#c9d3e2" stroke-width="6" stroke-linecap="round"/>
+  <path d="M626 754 L648 770 L626 786" fill="none" stroke="#c9d3e2" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="470" y="806" width="230" height="52" rx="26" fill="#eaf1fb"/>
+  <text x="585" y="842" font-size="30" font-weight="700" fill="#1f5fa8" text-anchor="middle">−46%</text>
+
+  <text x="60" y="940" font-size="24" fill="#5b6570">3.0 版核心病种</text>
+  <text x="60" y="1020" font-size="76" font-weight="800" fill="#2b3a72">5125</text>
+  <text x="60" y="1060" font-size="22" fill="#66717d">个 · 与官方公布数字一致</text>
+
+  <line x1="60" y1="1110" x2="740" y2="1110" stroke="#e3e6ea" stroke-width="2"/>
+
+  <text x="60" y="1180" font-size="28" font-weight="700" fill="#1f2328">可是，覆盖的病人变多了</text>
+  <text x="60" y="1236" font-size="22" fill="#5b6570">2.0 版</text>
+  <rect x="60" y="1256" width="680" height="34" rx="17" fill="#f0ece3"/>
+  <rect x="60" y="1256" width="626" height="34" rx="17" fill="url(#barA)"/>
+  <text x="712" y="1282" font-size="26" font-weight="700" fill="#5b6570">92%</text>
+  <text x="60" y="1350" font-size="22" fill="#5b6570">3.0 版</text>
+  <rect x="60" y="1370" width="680" height="34" rx="17" fill="#f0ece3"/>
+  <rect x="60" y="1370" width="646" height="34" rx="17" fill="url(#barB)"/>
+  <text x="712" y="1396" font-size="26" font-weight="700" fill="#2f8f83">95%</text>
+
+  <rect x="60" y="1450" width="680" height="220" rx="18" fill="#faf8f4"/>
+  <text x="90" y="1504" font-size="26" font-weight="700" fill="#1f2328">别急着替它编原因</text>
+  <text x="90" y="1552" font-size="22" fill="#5b6570">上面两组是官方公布的汇总数字，不是逐条对照表。</text>
+  <text x="90" y="1592" font-size="22" fill="#5b6570">哪些病种被并进去、怎么并的，得看目录本身。</text>
+  <text x="90" y="1632" font-size="22" fill="#1f5fa8">我把 10 张表 / 14154 行拆成了可核对的数据集。</text>
+
+  <rect x="60" y="1710" width="680" height="132" rx="18" fill="#eaf1fb"/>
+  <text x="90" y="1762" font-size="24" font-weight="700" fill="#2b3a72">怎么确认我没数错</text>
+  <text x="90" y="1804" font-size="21" fill="#4a5673">5125 核心病种 · 127 基层病种 · 23 条断言 · 每次提交从官方 Excel 重建</text>
+
+  <line x1="60" y1="1884" x2="740" y2="1884" stroke="#e3e6ea" stroke-width="2"/>
+  <text x="60" y="1922" font-size="18" fill="#66717d">独立研究实现，与发布机构无隶属关系，未获任何官方认证；不含真实病案，不构成结算或支付意见。</text>
+  <text x="60" y="1952" font-size="18" fill="#66717d">github.com/Meekoriela/cn-dip3-rule-baseline　·　meekoriela.github.io/cn-dip3-rule-baseline/</text>
+  <text x="60" y="1982" font-size="17" fill="#a6aebd">数据源：国家医保局《按病种分值（DIP）付费 3.0 版分组方案》公开附件（2026-09-09）</text>
+</svg>
+
+</div>
+
+<script>
+function svgToPng(cb){
+  var svg=document.getElementById('art');
+  var s=new XMLSerializer().serializeToString(svg);
+  var blob=new Blob([s],{type:'image/svg+xml;charset=utf-8'});
+  var url=URL.createObjectURL(blob);
+  var img=new Image();
+  img.onload=function(){
+    var c=document.createElement('canvas');c.width=1600;c.height=4000;
+    var g=c.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,c.width,c.height);
+    g.drawImage(img,0,0,c.width,c.height);
+    URL.revokeObjectURL(url);cb(c.toDataURL('image/png'));
+  };
+  img.onerror=function(){URL.revokeObjectURL(url);alert('图片生成失败，请换 Chrome / Edge 打开');};
+  img.src=url;
+}
+document.getElementById('dl').addEventListener('click',function(){
+  svgToPng(function(data){
+    var a=document.createElement('a');a.download='DIP3-砍掉46覆盖反升.png';a.href=data;a.click();
+  });
+});
+document.getElementById('open').addEventListener('click',function(){
+  svgToPng(function(data){var w=window.open();if(w)w.document.write('<img src="'+data+'" style="width:100%">');});
+});
+</script>
+</body>
+</html>
